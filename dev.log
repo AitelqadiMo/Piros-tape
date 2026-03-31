@@ -1,0 +1,35 @@
+
+> piros-tape@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.66:3000
+- Environments: .env.local
+✓ Ready in 172ms
+
+ GET / 200 in 189ms (next.js: 92ms, application-code: 97ms)
+ GET /api/jobs 200 in 38ms (next.js: 29ms, application-code: 9ms)
+ POST /api/jobs 200 in 9ms (next.js: 1910µs, application-code: 7ms)
+[Stream.GET] Job status is pending, starting pipeline for job-1774979607640-3ltq4l
+[Stream.GET] Calling runPipeline...
+[Pipeline.runPipeline] Starting for job job-1774979607640-3ltq4l
+[Pipeline] Checking keys: SUNO=set, GEMINI=set
+[Pipeline] Emitting step 1 running...
+[Pipeline] Calling log...
+[Pipeline.log] INFO: Submitting to Suno API (sunoapi.org)...
+[Pipeline] Building prompts...
+[Pipeline.log] INFO: Style: 1970s Hungarian warm funk soul, nostalgic, melodic, joyful groove, vintage analog, 95 BPM
+[Pipeline.log] INFO: Prompt length: 627 chars
+[Pipeline] About to call generateMusic with: {
+  sunoStyle: '1970s Hungarian warm funk soul, nostalgic, melodic, joyful groove, vintage analog, 95 BPM',
+  promptLength: 627,
+  title: 'TEST TRACK'
+}
+[Suno.generateMusic] Starting with title: TEST TRACK
+[Suno.generateMusic] Response status: 200
+[Suno.generateMusic] Response JSON: {"code":400,"msg":"Please enter callBackUrl.","data":null}
+[Pipeline.log] ERROR: Error at step 1: Suno returned no clips
+[Stream.GET] runPipeline completed successfully for job-1774979607640-3ltq4l
+ GET /api/jobs/job-1774979607640-3ltq4l/stream 200 in 1291ms (next.js: 527ms, application-code: 764ms)
+[?25h

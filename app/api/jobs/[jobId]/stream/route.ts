@@ -82,12 +82,18 @@ export async function GET(
 
       // Start pipeline if pending
       if (job.status === "pending") {
+        console.log(`[Stream.GET] Job status is pending, starting pipeline for ${jobId}`);
         try {
+          console.log(`[Stream.GET] Calling runPipeline...`);
           await runPipeline(job, emit);
+          console.log(`[Stream.GET] runPipeline completed successfully for ${jobId}`);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
+          console.error(`[Stream.GET] runPipeline threw error for ${jobId}:`, message);
           emit("error", { step: 0, message });
         }
+      } else {
+        console.log(`[Stream.GET] Job ${jobId} already ${job.status}, skipping pipeline start`);
       }
       // If running (reconnect), the pipeline is already running in another async context —
       // this SSE connection is just a new listener. The pipeline will emit to the original

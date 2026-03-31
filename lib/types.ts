@@ -28,6 +28,7 @@ export interface Job {
   outputDir?: string;
   waitingFor?: AwaitingInputType | null;
   waitingPayload?: unknown;
+  lyrics?: string;
 }
 
 export interface StyleOption {

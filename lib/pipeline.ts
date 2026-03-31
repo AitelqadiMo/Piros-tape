@@ -28,8 +28,12 @@ function safeFileName(title: string): string {
 }
 
 export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
+  console.log(`[Pipeline.runPipeline] Starting for job ${job.id}`);
+  
   const sunoKey = process.env.SUNO_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
+
+  console.log(`[Pipeline] Checking keys: SUNO=${sunoKey ? "set" : "MISSING"}, GEMINI=${geminiKey ? "set" : "MISSING"}`);
 
   if (!sunoKey || sunoKey === "your_suno_key_here") {
     throw new Error("SUNO_API_KEY not configured");
@@ -57,25 +61,31 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
   });
 
   const log = (message: string, level: "info" | "success" | "error" = "info") => {
+    console.log(`[Pipeline.log] ${level.toUpperCase()}: ${message}`);
     emit("log", { timestamp: new Date().toISOString(), message, level });
   };
 
   try {
     // ── STEP 1: Suno Music Generation ─────────────────────────────────────
+    console.log("[Pipeline] Emitting step 1 running...");
     emit("step", { step: 1, status: "running", progress: 0, message: "Submitting to Suno API..." });
+    console.log("[Pipeline] Calling log...");
     log("Submitting to Suno API (sunoapi.org)...");
+    console.log("[Pipeline] Building prompts...");
 
     const sunoPrompt = buildSunoPrompt(job);
     const sunoStyle = buildSunoStyle(job);
     log(`Style: ${sunoStyle}`);
     log(`Prompt length: ${sunoPrompt.length} chars`);
 
+    console.log("[Pipeline] About to call generateMusic with:", { sunoStyle, promptLength: sunoPrompt.length, title: job.title });
     const initialClips = await generateMusic({
       prompt: sunoPrompt,
       style: sunoStyle,
       title: job.title,
       apiKey: sunoKey,
     });
+    console.log("[Pipeline] generateMusic returned:", initialClips.length, "clips");
 
     log(`${initialClips.length} clips queued — IDs: ${initialClips.map((c) => c.id.slice(0, 8)).join(", ")}`, "success");
     log("Polling for completion (up to 6 minutes)...");

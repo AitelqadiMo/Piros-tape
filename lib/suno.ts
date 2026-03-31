@@ -25,36 +25,103 @@ export async function generateMusic(params: {
   title: string;
   apiKey: string;
 }): Promise<SunoClip[]> {
+  console.log("[Suno.generateMusic] Starting with title:", params.title);
+  
+  // Build the request - some Suno API versions require specific fields
+  const requestBody = {
+    customMode: true,
+    instrumental: true,
+    model: "V4_5ALL",
+    prompt: params.prompt,
+    style: params.style,
+    title: params.title,
+    callBackUrl: "https://localhost:3000",  // Required by some Suno API versions
+  };
+  
+  try {
+    const bodyStr = JSON.stringify(requestBody);
+    console.log("[Suno.generateMusic] Request body:", bodyStr.slice(0, 300));
+  } catch (e) {
+    console.log("[Suno.generateMusic] Request body logging failed:", e);
+  }
+  
   const resp = await fetch(`${SUNO_BASE}/api/v1/generate`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${params.apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      customMode: true,
-      instrumental: true,
-      model: "V4_5ALL",
-      prompt: params.prompt,
-      style: params.style,
-      title: params.title,
-    }),
+    body: JSON.stringify(requestBody),
   });
+
+  console.log("[Suno.generateMusic] Response status:", resp.status);
 
   if (!resp.ok) {
     const text = await resp.text();
+    console.error("[Suno.generateMusic] Error response:", text);
     throw new Error(`Suno API error ${resp.status}: ${text}`);
   }
 
   const json = await resp.json();
-  // Response shape: { code: 200, data: [clip, clip] } or direct array
-  const clips: SunoClip[] = Array.isArray(json)
-    ? json
-    : Array.isArray(json.data)
-    ? json.data
-    : [];
+  console.log("[Suno.generateMusic] Full response JSON:", JSON.stringify(json));
+  
+  // Handle error responses from API (code != 200)
+  if (json.code && json.code !== 200) {
+    console.error(`[Suno.generateMusic] API returned error code ${json.code}: ${json.msg}`);
+    throw new Error(`Suno API error: ${json.msg}`);
+  }
+  
+  // Response shape varies - try multiple paths to find clips
+  let clips: SunoClip[] = [];
+  
+  if (Array.isArray(json)) {
+    // Direct array response
+    clips = json;
+  } else if (json.data) {
+    if (Array.isArray(json.data)) {
+      // Array in data field
+      clips = json.data;
+    } else if (json.data.clips && Array.isArray(json.data.clips)) {
+      // Nested in data.clips
+      clips = json.data.clips;
+    } else if (json.data.audios && Array.isArray(json.data.audios)) {
+      // Some Suno versions use 'audios'
+      clips = json.data.audios;
+    } else if (json.data.list && Array.isArray(json.data.list)) {
+      // Some versions use 'list'
+      clips = json.data.list;
+    } else if (typeof json.data === 'object' && !Array.isArray(json.data) && json.data.id) {
+      // Single clip as object
+      clips = [json.data];
+    }
+  } else if (json.audios && Array.isArray(json.audios)) {
+    // Top-level audios field
+    clips = json.audios;
+  } else if (json.clips && Array.isArray(json.clips)) {
+    // Top-level clips field
+    clips = json.clips;
+  }
 
-  if (clips.length === 0) throw new Error("Suno returned no clips");
+  console.log("[Suno.generateMusic] Extracted clips:", clips.length);
+  if (clips.length > 0) {
+    console.log("[Suno.generateMusic] Clip sample:", clips[0]);
+  }
+
+  if (clips.length === 0) {
+    console.error("[Suno.generateMusic] ERROR: No clips in response. Full response was:", JSON.stringify(json));
+    // Don't fail yet - maybe Suno only returns task ID and we need to poll
+    // Extract task ID or other identifier for polling
+    const taskId = json.data?.id || json.id || json.taskId;
+    if (taskId) {
+      console.log("[Suno.generateMusic] Got task ID, will need to poll:", taskId);
+      // Return a placeholder clip object with just the ID
+      return [{
+        id: String(taskId),
+        status: "pending",
+      } as SunoClip];
+    }
+    throw new Error(`Suno API error: No clips generated. Response: ${json.msg || JSON.stringify(json)}`);
+  }
   return clips;
 }
 

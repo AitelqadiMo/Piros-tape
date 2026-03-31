@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { artists, title, style, decade, bpm, budapestYear, moodLine, releaseYear } = body;
+    const { artists, title, style, decade, bpm, budapestYear, moodLine, releaseYear, lyrics } = body;
 
     if (!artists || !title || !style || !decade || !bpm || !budapestYear) {
       return NextResponse.json(
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       budapestYear: Number(budapestYear),
       moodLine: moodLine || "",
       releaseYear: releaseYear || undefined,
+      lyrics: lyrics || undefined,
     });
 
     return NextResponse.json({ jobId: job.id });

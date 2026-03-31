@@ -10,7 +10,13 @@
     "moodLine": "warm, alive, nostalgic — a crowded dance floor on a summer night, Budapest 1974",
     "status": "legacy",
     "currentStep": 5,
-    "stepStatuses": ["done", "done", "done", "done", "done"],
+    "stepStatuses": [
+      "done",
+      "done",
+      "done",
+      "done",
+      "done"
+    ],
     "createdAt": "2025-01-15T12:00:00Z",
     "completedAt": "2025-01-15T12:08:00Z"
   },
@@ -25,7 +31,13 @@
     "moodLine": "dark, cinematic, urban night — smoky basement club in Budapest, 1968",
     "status": "legacy",
     "currentStep": 5,
-    "stepStatuses": ["done", "done", "done", "done", "done"],
+    "stepStatuses": [
+      "done",
+      "done",
+      "done",
+      "done",
+      "done"
+    ],
     "createdAt": "2025-02-10T14:00:00Z",
     "completedAt": "2025-02-10T14:07:00Z"
   },
@@ -40,7 +52,13 @@
     "moodLine": "paranoid, political, apocalyptic — a government broadcast from a collapsing empire, Budapest 1968",
     "status": "legacy",
     "currentStep": 5,
-    "stepStatuses": ["done", "done", "done", "done", "done"],
+    "stepStatuses": [
+      "done",
+      "done",
+      "done",
+      "done",
+      "done"
+    ],
     "createdAt": "2025-03-05T10:00:00Z",
     "completedAt": "2025-03-05T10:09:00Z"
   },
@@ -55,7 +73,13 @@
     "moodLine": "bittersweet, isolated, melancholic — a musician who won everything and feels nothing, Budapest 1975",
     "status": "legacy",
     "currentStep": 5,
-    "stepStatuses": ["done", "done", "done", "done", "done"],
+    "stepStatuses": [
+      "done",
+      "done",
+      "done",
+      "done",
+      "done"
+    ],
     "createdAt": "2025-04-20T16:00:00Z",
     "completedAt": "2025-04-20T16:06:00Z"
   },
@@ -70,7 +94,13 @@
     "moodLine": "fatalistic, cinematic, slow-burning — a man walking home alone through Pest at midnight, Budapest 1974",
     "status": "legacy",
     "currentStep": 5,
-    "stepStatuses": ["done", "done", "done", "done", "done"],
+    "stepStatuses": [
+      "done",
+      "done",
+      "done",
+      "done",
+      "done"
+    ],
     "createdAt": "2025-06-12T18:00:00Z",
     "completedAt": "2025-06-12T18:10:00Z"
   },
@@ -85,8 +115,186 @@
     "moodLine": "bittersweet, isolated, melancholic — a musician who won everything and feels nothing, Budapest 1975",
     "status": "legacy",
     "currentStep": 5,
-    "stepStatuses": ["done", "done", "done", "done", "done"],
+    "stepStatuses": [
+      "done",
+      "done",
+      "done",
+      "done",
+      "done"
+    ],
     "createdAt": "2025-08-01T20:00:00Z",
     "completedAt": "2025-08-01T20:07:00Z"
+  },
+  {
+    "artists": "VIGYÁZZ, KÉSZ, RAJT ",
+    "title": "CARSON COMA",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 96,
+    "budapestYear": 1974,
+    "moodLine": "euphoric, danceable, electric — a rooftop party above the city, Budapest 1974",
+    "releaseYear": "2023",
+    "id": "job-1774975448878-sufsri",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T16:44:08.878Z"
+  },
+  {
+    "artists": "hh",
+    "title": "TEST",
+    "style": "Cold War Funk Noir",
+    "decade": "1960",
+    "bpm": 88,
+    "budapestYear": 1968,
+    "moodLine": "paranoid, political, apocalyptic — a government broadcast from a collapsing empire, Budapest 1968",
+    "id": "job-1774976839858-4t07qu",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:07:19.858Z"
+  },
+  {
+    "artists": "AK26 × Siska Finuccsi",
+    "title": "UTCAI JOG",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 88,
+    "budapestYear": 1974,
+    "moodLine": "euphoric, danceable, electric — a rooftop party above the city, Budapest 1974",
+    "lyrics": "Refrén:\nNem hallasz szót, csak az utcai jog diktálja, hogy élned kell\nÉs ha valami kell, azt elhozza a futár a házba, ha épp otthon lelsz\nNincs olyan cél, amit ne érnék el, nekem ez a hely adta a kezeket\nÉs ha te nem hallasz szót, csak az utcai jog diktálja, hogy élned kell\nÉs ha valami kell, azt elhozza a futár a házba, ha épp otthon lelsz\nNincs olyan cél, amit ne érnék el, nekem ez a hely adta a kezeket\n\nAK26 (Giajjennó):\nGiajjennó vagyok, a nevem jól jegyezd meg\nEzek a srácok sosem tudtak legyőzni engem\nNincs olyan cél, amit ne érnék el\nEzek a srácok csak a tőlem kapott kenyeret eszik meg\nFújom a füstöt, a tüdőmet kiköhögöm\nAnnyit ettem régen, a szemedet se merd rám vetni, kölyök\nVeszélyes vagyok, a szövegemet jól figyeld meg\nA kurva anyádat is megrúgom, ha a nevünket kiejted\nA srácok szeme szikrát szór, a tekintetüket látod\nA miénk, a miénk, a miénk a világ\nA srácok zsebe tele van, megérdemlik a pénzt\nEz a pálya, ez a pálya, ez a pálya, ez a miénk\nFújom a füstöt, a tüdőmet kiköhögöm\nAnnyit ettem régen, a szemedet se merd rám vetni, kölyök\nVeszélyes vagyok, a szövegemet jól figyeld meg\nA kurva anyádat is megrúgom, ha a nevünket kiejted\n\nRefrén:\nNem hallasz szót, csak az utcai jog diktálja, hogy élned kell\nÉs ha valami kell, azt elhozza a futár a házba, ha épp otthon lelsz\nNincs olyan cél, amit ne érnék el, nekem ez a hely adta a kezeket\nÉs ha te nem hallasz szót, csak az utcai jog diktálja, hogy élned kell\nÉs ha valami kell, azt elhozza a futár a házba, ha épp otthon lelsz\nNincs olyan cél, amit ne érnék el, nekem ez a hely adta a kezeket\n\nSiska Finuccsi:\nÁlmomban jön a pénz, de ha felkelek, akkor is\nA telefonom csörög, megint a kurva dílerem az, aki\nA gombot nyomja, hát persze, hogy jön a kocsim\nTudom, hogy megint a körúton fog elkapni a razzia\nDe nem számít, az utcai jog a lényeg\nA cigányok mindent tudnak, a srácok is élnek\nA pénz a lényeg, a pénz a király\nA kurvák is imádják, ha tele a zseb, és van rá\nHogy vegyél neki mindent, amit akar\nA srácok is imádják, ha a zseb tele van\nA kurva anyádat is megrúgom, ha a nevünket kiejted\nA cigányok mindent tudnak, a srácok is élnek\nA pénz a lényeg, a pénz a király\nA kurvák is imádják, ha tele a zseb, és van rá\nHogy vegyél neki mindent, amit akar\nA srácok is imádják, ha a zseb tele van\n\nAK26 (Hiro):\nHiro vagyok, a nevem jól jegyezd meg\nEzek a srácok sosem tudtak legyőzni engem\nNincs olyan cél, amit ne érnék el\nEzek a srácok csak a tőlem kapott kenyeret eszik meg\nFújom a füstöt, a tüdőmet kiköhögöm\nAnnyit ettem régen, a szemedet se merd rám vetni, kölyök\nVeszélyes vagyok, a szövegemet jól figyeld meg\nA kurva anyádat is megrúgom, ha a nevünket kiejted\nA srácok szeme szikrát szór, a tekintetüket látod\nA miénk, a miénk, a miénk a világ\nA srácok zsebe tele van, megérdemlik a pénzt\nEz a pálya, ez a pálya, ez a pálya, ez a miénk\nFújom a füstöt, a tüdőmet kiköhögöm\nAnnyit ettem régen, a szemedet se merd rám vetni, kölyök\nVeszélyes vagyok, a szövegemet jól figyeld meg\nA kurva anyádat is megrúgom, ha a nevünket kiejted\n\nRefrén:\nNem hallasz szót, csak az utcai jog diktálja, hogy élned kell\nÉs ha valami kell, azt elhozza a futár a házba, ha épp otthon lelsz\nNincs olyan cél, amit ne érnék el, nekem ez a hely adta a kezeket\nÉs ha te nem hallasz szót, csak az utcai jog diktálja, hogy élned kell\nÉs ha valami kell, azt elhozza a futár a házba, ha épp otthon lelsz\nNincs olyan cél, amit ne érnék el, nekem ez a hely adta a kezeket",
+    "id": "job-1774978165474-8iasie",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:29:25.474Z"
+  },
+  {
+    "artists": "TIRPA × AK26 × Siska Finuccsi",
+    "title": "BETONROZSDA",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 98,
+    "budapestYear": 1974,
+    "moodLine": "euphoric, danceable, electric — a rooftop party above the city, Budapest 1974",
+    "lyrics": "BETONROZSDA\n\n[TIRPA]\nA beton meg a rozsda, a szemedben a kosz van\nA falu meg a város, a szívedben a poshadt\nA nyomor meg a pénz, a harc mióta van\nA dühöm még mindig ég, ki tudja mióta tart\nTíz éve írom a sorokat, tíz éve megy a show\nHúsz éve élem a sorokat, és a fejem még mindig szól\nLátom a feszültséget, az agressziót és a bajt\nÉn tudom mi a szegénység, na meg tudom mi a harc\nÉn tudom, hogy nem csak a szó, ami bántja az embert\nÉn tudom, hogy miért mondta anyád, hogy ne járjál el estleg\nMikor az orrod alá szólnak, ott a kéz meg a láb\nÉs a kést beléd szúrják, mert ez nem mese, te\nMert az idő múlik, és a pult is megy\nÉs a pénz is pörög, és a sör is egy\nÉs a szív is dobog, és az ész is van\nDe a harc még mindig megy, mert a beton rozsda van\nNem kell senki szava, nekem elég a testem\nAmikor egyedül is megállok a két lábamon\nAmikor nem félek semmitől, mert tudom mi az ár\nÉs a vér is folyik, mert a beton rozsda\n\n[AK26 (Hiro)]\nVan egy történet, ami a betonon íródott\nAhol a rozsda eszi az aszfaltot, az álmot\nÉs a szívben is van egy seb, ami a nyomorból maradt\nÉs a harc még mindig megy, mert a beton rozsda\nEz nem egy mese, ez a valóság, ami körülöttünk van\nEz a szegénység, ami a lelkünket is megöli\nÉs a harag még mindig ég, mert a beton rozsda\nÉs a vér is folyik, mert a beton rozsda\nAmikor a szemedbe nézek, látom a fájdalmat\nA harcot, ami a szívedben ég, és a dühöt\nÉs a harc még mindig megy, mert a beton rozsda\nÉs a vér is folyik, mert a beton rozsda\nÉs a könny is csorog, mert a beton rozsda\nÉs a szív is ver, mert a beton rozsda\n\n[AK26 (Giajjeno)]\nA blokk, a panel, a szürkeség, a rozzantság\nAhol a gyerekek is tudják, hogy mi az éhség\nAhol a falak is súlytják, a lelkeket is megölik\nAhol a remény is meghal, a beton rozsda\nAhol a szeretet is elvész, a pénz a minden\nAhol a testvérek is harcolnak, a beton rozsda\nAhol a barátok is elárulnak, a beton rozsda\nAhol a szív is megkeményedik, a beton rozsda\nDe mi még mindig itt vagyunk, a betonon élünk\nA betonon írjuk a sorokat, a betonon álmodunk\nÉs a harc még mindig megy, mert a beton rozsda\nÉs a vér is folyik, mert a beton rozsda\n\n[Siska Finuccsi]\nA beton meg a rozsda, ez itt nem mese\nEz itt a valóság, a kemény élet\nAhol a szívek is rozsdásodnak, a lelkek is megrohadnak\nAhol a remény is eltűnik, a beton rozsda\nAz utcán harcolunk, az utcán élünk\nAz utcán írjuk a sorokat, az utcán álmodunk\nÉs a harc még mindig megy, mert a beton rozsda\nÉs a vér is folyik, mert a beton rozsda\nAhol a szeretet is elvész, a pénz a minden\nAhol a testvérek is harcolnak, a beton rozsda\nAhol a barátok is elárulnak, a beton rozsda\nAhol a szív is megkeményedik, a beton rozsda\nDe mi még mindig itt vagyunk, a betonon élünk\nA betonon írjuk a sorokat, a betonon álmodunk\nÉs a harc még mindig megy, mert a beton rozsda\nÉs a vér is folyik, mert a beton rozsda\nA beton meg a rozsda, a szemedben a kosz van\nA falu meg a város, a szívedben a poshadt\nA nyomor meg a pénz, a harc mióta van\nA dühöm még mindig ég, ki tudja mióta tart\nTíz éve írom a sorokat, tíz éve megy a show\nHúsz éve élem a sorokat, és a fejem még mindig szól\nLátom a feszültséget, az agressziót és a bajt\nÉn tudom mi a szegénység, na meg tudom mi a harc\nÉn tudom, hogy nem csak a szó, ami bántja az embert\nÉn tudom, hogy miért mondta anyád, hogy ne járjál el estleg\nMikor az orrod alá szólnak, ott a kéz meg a láb\nÉs a kést beléd szúrják, mert ez nem mese, te\nMert az idő múlik, és a pult is megy\nÉs a pénz is pörög, és a sör is egy\nÉs a szív is dobog, és az ész is van\nDe a harc még mindig megy, mert a beton rozsda van\nNem kell senki szava, nekem elég a testem\nAmikor egyedül is megállok a két lábamon\nAmikor nem félek semmitől, mert tudom mi az ár\nÉs a vér is folyik, mert a beton rozsda",
+    "id": "job-1774979260624-5zk7lg",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "running",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:47:40.624Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774979260624-5zk7lg",
+    "waitingFor": null
+  },
+  {
+    "artists": "TEST ARTIST",
+    "title": "TEST TRACK",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 95,
+    "budapestYear": 1974,
+    "moodLine": "test mood",
+    "lyrics": "test lyrics",
+    "id": "job-1774979607640-3ltq4l",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "running",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:53:27.640Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774979607640-3ltq4l",
+    "waitingFor": null
+  },
+  {
+    "artists": "TEST ARTIST",
+    "title": "TEST SONG",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 100,
+    "budapestYear": 1970,
+    "moodLine": "test",
+    "id": "job-1774979855326-w9xa3d",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "running",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:57:35.326Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774979855326-w9xa3d",
+    "waitingFor": null
+  },
+  {
+    "artists": "TEST ARTIST",
+    "title": "ANOTHER TEST",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 100,
+    "budapestYear": 1970,
+    "moodLine": "test",
+    "id": "job-1774979910221-679j5n",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:58:30.221Z"
+  },
+  {
+    "artists": "TEST ARTIST",
+    "title": "ANOTHER TEST",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 100,
+    "budapestYear": 1970,
+    "moodLine": "test",
+    "id": "job-1774979917799-x7bgru",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "running",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T17:58:37.799Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774979917799-x7bgru",
+    "waitingFor": null
   }
 ]
