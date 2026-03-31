@@ -3,7 +3,7 @@ import { getJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 600; // 10 minutes max for pipeline
+export const maxDuration = 600;
 
 export async function GET(
   request: NextRequest,
@@ -22,19 +22,23 @@ export async function GET(
     async start(controller) {
       const emit = (event: string, data: unknown) => {
         try {
-          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+          );
         } catch {
-          // Stream may be closed
+          // Stream closed
         }
       };
 
-      // If job is already complete or errored, send current state and close
+      // Already complete / legacy
       if (job.status === "complete" || job.status === "legacy") {
-        emit("step", { step: 5, status: "done", progress: 100, message: "Already complete" });
+        for (let i = 0; i < 5; i++) {
+          emit("step", { step: i + 1, status: "done", progress: 100, message: "Complete" });
+        }
         emit("complete", {
-          videoPath: `${job.outputDir || ""}`,
-          thumbnailPath: `${job.outputDir || ""}`,
-          metadataPath: `${job.outputDir || ""}`,
+          videoPath: job.outputDir || "",
+          thumbnailPath: job.outputDir || "",
+          metadataPath: job.outputDir || "",
         });
         controller.close();
         return;
@@ -46,19 +50,28 @@ export async function GET(
         return;
       }
 
-      // If already running, send current state
+      // Reconnect: replay current known step states
       if (job.status === "running") {
         for (let i = 0; i < job.stepStatuses.length; i++) {
+          const s = job.stepStatuses[i];
           emit("step", {
             step: i + 1,
-            status: job.stepStatuses[i],
-            progress: job.stepStatuses[i] === "done" ? 100 : 0,
-            message: job.stepStatuses[i] === "done" ? "Complete" : "Waiting...",
+            status: s,
+            progress: s === "done" ? 100 : 0,
+            message: s === "done" ? "Complete" : s === "running" ? "In progress..." : "",
+          });
+        }
+
+        // If pipeline is paused waiting for user input, re-emit that event
+        if (job.waitingFor && job.waitingPayload) {
+          emit("awaiting_input", {
+            type: job.waitingFor,
+            payload: job.waitingPayload,
           });
         }
       }
 
-      // Set up heartbeat
+      // Heartbeat
       const heartbeat = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(": ping\n\n"));
@@ -76,6 +89,10 @@ export async function GET(
           emit("error", { step: 0, message });
         }
       }
+      // If running (reconnect), the pipeline is already running in another async context —
+      // this SSE connection is just a new listener. The pipeline will emit to the original
+      // controller, not this one. To fix for reconnect we'd need a pub/sub, but for a
+      // single-tab local app the page reload scenario is handled by replaying state above.
 
       clearInterval(heartbeat);
       controller.close();

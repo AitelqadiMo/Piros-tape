@@ -15,8 +15,8 @@ export async function GET(
   }
 
   const file = request.nextUrl.searchParams.get("file");
-  if (!file || !["video", "thumbnail", "metadata"].includes(file)) {
-    return NextResponse.json({ error: "Invalid file type. Use: video, thumbnail, metadata" }, { status: 400 });
+  if (!file || !["video", "thumbnail", "thumbnail_raw", "metadata"].includes(file)) {
+    return NextResponse.json({ error: "Invalid file type. Use: video, thumbnail, thumbnail_raw, metadata" }, { status: 400 });
   }
 
   const base = process.env.OUTPUT_DIR || "./output";
@@ -38,6 +38,11 @@ export async function GET(
       filePath = path.join(outputDir, "thumbnail.jpg");
       contentType = "image/jpeg";
       fileName = `${safeName}_thumbnail.jpg`;
+      break;
+    case "thumbnail_raw":
+      filePath = path.join(outputDir, "thumbnail_raw.jpg");
+      contentType = "image/jpeg";
+      fileName = `${safeName}_thumbnail_raw.jpg`;
       break;
     case "metadata":
       filePath = path.join(outputDir, "metadata.txt");

@@ -2,20 +2,22 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { promises as fs } from "fs";
 import path from "path";
 
+// Nano Banana 2 = gemini-3.1-flash-image-preview
+const IMAGE_MODEL = "gemini-3.1-flash-image-preview";
+const TEXT_MODEL = "gemini-2.0-flash";
+
 export async function generateThumbnail(
   imagePrompt: string,
   apiKey: string,
   outputPath: string
 ): Promise<void> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-preview-image-generation",
-  });
+  const model = genAI.getGenerativeModel({ model: IMAGE_MODEL });
 
   const result = await model.generateContent({
     contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
     generationConfig: {
-      responseModalities: ["IMAGE"] as unknown as undefined,
+      responseModalities: ["IMAGE"],
     } as unknown as undefined,
   });
 
@@ -27,7 +29,9 @@ export async function generateThumbnail(
 
   const parts = candidates[0].content.parts;
   for (const part of parts) {
-    const inlineData = (part as { inlineData?: { mimeType: string; data: string } }).inlineData;
+    const inlineData = (
+      part as { inlineData?: { mimeType: string; data: string } }
+    ).inlineData;
     if (inlineData && inlineData.mimeType.startsWith("image/")) {
       const dir = path.dirname(outputPath);
       await fs.mkdir(dir, { recursive: true });
@@ -45,8 +49,7 @@ export async function generateSceneDescription(
   apiKey: string
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
+  const model = genAI.getGenerativeModel({ model: TEXT_MODEL });
   const result = await model.generateContent(prompt);
   return result.response.text();
 }
@@ -58,10 +61,23 @@ export async function researchSongs(
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: TEXT_MODEL,
     systemInstruction: systemPrompt,
   });
-
   const result = await model.generateContent(query);
   return result.response.text();
+}
+
+/**
+ * Test whether a Gemini API key is valid with a tiny text generation.
+ */
+export async function testGeminiKey(apiKey: string): Promise<boolean> {
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: TEXT_MODEL });
+    const result = await model.generateContent("Say ok");
+    return !!result.response.text();
+  } catch {
+    return false;
+  }
 }

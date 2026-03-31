@@ -18,23 +18,38 @@ const imageMoodSentences: Record<StyleName, string> = {
   "Upbeat Cinematic Soul Funk": "The mood is electric and celebratory — a last great night before the city changes.",
 };
 
+/**
+ * Style string for sunoapi.org custom mode (concise, describes the sonic palette).
+ */
+export function buildSunoStyle(job: Job): string {
+  const base: Record<string, string> = {
+    "Funk Noir": "dark noir funk, gritty soul, minor key, smoky",
+    "Cold War Funk Noir": "cold war spy funk, paranoid soul, Eastern European, political",
+    "Political Soul": "bittersweet soul, melancholic funk, cinematic, isolated",
+    "Funk Soul": "warm funk soul, nostalgic, melodic, joyful groove",
+    "Cinematic Soul Funk": "cinematic soul funk, fatalistic, atmospheric, slow-burn",
+    "Upbeat Cinematic Soul Funk": "upbeat soul funk, euphoric, danceable, celebratory",
+  };
+  const descriptor = base[job.style] || "vintage funk soul";
+  return `${job.decade}s Hungarian ${descriptor}, vintage analog, ${job.bpm} BPM`;
+}
+
+/**
+ * Detailed prompt for sunoapi.org custom mode (instruments, arrangement, mood).
+ * Used as the 'prompt' field. Limit: 5000 chars for V4_5ALL.
+ */
 export function buildSunoPrompt(job: Job): string {
   const moodLine =
     job.moodLine ||
     defaultMoodLines[job.style].replace("[YEAR]", String(job.budapestYear));
 
-  const prompt = `Genre: Dark 1960s Funk / Hungarian Rap Fusion
-Instruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs (trumpet, trombone, baritone sax), analog tape noise.
+  const prompt = `Instruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs (trumpet, trombone, baritone sax), analog tape noise.
 Tempo: ${job.bpm} BPM, laid-back swing.
 Mood: ${moodLine}
-Vocal style: raw Hungarian rap, close-mic delivery, overdriven tape tone, minimal reverb.
 Arrangement: intro (bass riff + drums), verse (rhythm + sparse organ), chorus (full horns + accents), instrumental break (guitar + organ solo), outro fading into tape hiss.
 Production: analog tape compression, mono reverb plate, low-shelf warmth, mild saturation; no digital synths or trap.
-Keywords: vintage, noir funk, Budapest ${job.budapestYear}, smoky soul groove`;
+Setting: Budapest ${job.budapestYear}, smoky soul groove, vintage noir atmosphere.`;
 
-  if (prompt.length > 950) {
-    throw new Error(`Prompt too long: ${prompt.length} chars`);
-  }
   return prompt;
 }
 

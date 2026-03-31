@@ -19,11 +19,13 @@ export default function SettingsPage() {
   const testSunoKey = async () => {
     setSunoStatus("testing");
     try {
-      const resp = await fetch(
-        `${process.env.NEXT_PUBLIC_SUNO_BASE_URL || "https://studio-api.suno.ai"}/api/clip/test`,
-        { headers: { Authorization: `Bearer ${sunoKey}` } }
-      );
-      setSunoStatus(resp.status !== 403 ? "valid" : "invalid");
+      const resp = await fetch("/api/test-suno", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: sunoKey }),
+      });
+      const data = await resp.json();
+      setSunoStatus(data.valid ? "valid" : "invalid");
     } catch {
       setSunoStatus("invalid");
     }
@@ -32,12 +34,13 @@ export default function SettingsPage() {
   const testGeminiKey = async () => {
     setGeminiStatus("testing");
     try {
-      const resp = await fetch("/api/research", {
+      const resp = await fetch("/api/test-gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: "test connection" }),
+        body: JSON.stringify({ key: geminiKey }),
       });
-      setGeminiStatus(resp.ok ? "valid" : "invalid");
+      const data = await resp.json();
+      setGeminiStatus(data.valid ? "valid" : "invalid");
     } catch {
       setGeminiStatus("invalid");
     }

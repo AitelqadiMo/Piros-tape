@@ -26,6 +26,8 @@ export interface Job {
   createdAt: string;
   completedAt?: string;
   outputDir?: string;
+  waitingFor?: AwaitingInputType | null;
+  waitingPayload?: unknown;
 }
 
 export interface StyleOption {
@@ -53,6 +55,27 @@ export interface PipelineCompleteEvent {
   videoPath: string;
   thumbnailPath: string;
   metadataPath: string;
+}
+
+export interface SongSelectionPayload {
+  clips: Array<{
+    id: string;
+    streamUrl?: string;
+    audioUrl?: string;
+    title?: string;
+    duration?: number;
+  }>;
+}
+
+export interface ThumbnailReviewPayload {
+  thumbnailUrl: string; // served via /api/jobs/[id]/download?file=thumbnail_raw
+}
+
+export type AwaitingInputType = "song_selection" | "thumbnail_review";
+
+export interface AwaitingInputEvent {
+  type: AwaitingInputType;
+  payload: SongSelectionPayload | ThumbnailReviewPayload;
 }
 
 export interface ResearchCandidate {
