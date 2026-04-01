@@ -2,6 +2,7 @@ import path from "path";
 import { promises as fs } from "fs";
 import { Job } from "./types";
 import { updateJob } from "./jobs";
+import { createAsset } from "./assets";
 import {
   buildSunoPrompt,
   buildSunoStyle,
@@ -29,11 +30,9 @@ function safeFileName(title: string): string {
 
 export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
   console.log(`[Pipeline.runPipeline] Starting for job ${job.id}`);
-  
+
   const sunoKey = process.env.SUNO_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
-
-  console.log(`[Pipeline] Checking keys: SUNO=${sunoKey ? "set" : "MISSING"}, GEMINI=${geminiKey ? "set" : "MISSING"}`);
 
   if (!sunoKey || sunoKey === "your_suno_key_here") {
     throw new Error("SUNO_API_KEY not configured");
@@ -52,11 +51,13 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
   const videoPath = path.join(outputDir, `${safeName}_PIROS_TAPE.mp4`);
   const metadataPath = path.join(outputDir, "metadata.txt");
 
+  const sixPending = ["running", "pending", "pending", "pending", "pending", "pending"] as Job["stepStatuses"];
+
   await updateJob(job.id, {
     status: "running",
     outputDir,
     currentStep: 1,
-    stepStatuses: ["running", "pending", "pending", "pending", "pending"],
+    stepStatuses: sixPending,
     waitingFor: null,
   });
 
@@ -67,25 +68,20 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
   try {
     // ── STEP 1: Suno Music Generation ─────────────────────────────────────
-    console.log("[Pipeline] Emitting step 1 running...");
     emit("step", { step: 1, status: "running", progress: 0, message: "Submitting to Suno API..." });
-    console.log("[Pipeline] Calling log...");
     log("Submitting to Suno API (sunoapi.org)...");
-    console.log("[Pipeline] Building prompts...");
 
     const sunoPrompt = buildSunoPrompt(job);
     const sunoStyle = buildSunoStyle(job);
     log(`Style: ${sunoStyle}`);
     log(`Prompt length: ${sunoPrompt.length} chars`);
 
-    console.log("[Pipeline] About to call generateMusic with:", { sunoStyle, promptLength: sunoPrompt.length, title: job.title });
     const initialClips = await generateMusic({
       prompt: sunoPrompt,
       style: sunoStyle,
       title: job.title,
       apiKey: sunoKey,
     });
-    console.log("[Pipeline] generateMusic returned:", initialClips.length, "clips");
 
     log(`${initialClips.length} clips queued — IDs: ${initialClips.map((c) => c.id.slice(0, 8)).join(", ")}`, "success");
     log("Polling for completion (up to 6 minutes)...");
@@ -113,7 +109,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
     await updateJob(job.id, {
       currentStep: 1,
-      stepStatuses: ["done", "pending", "pending", "pending", "pending"],
+      stepStatuses: ["done", "pending", "pending", "pending", "pending", "pending"],
       waitingFor: "song_selection",
       waitingPayload: selectionPayload,
     });
@@ -133,14 +129,27 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     const audioStat = await fs.stat(audioPath);
     log(`Audio downloaded: ${(audioStat.size / 1024 / 1024).toFixed(1)} MB`, "success");
 
+    // Save song asset
+    await createAsset({
+      type: "song",
+      title: job.title,
+      artists: job.artists,
+      style: job.style,
+      filePath: audioPath,
+      fileName: "song.mp3",
+      fileSize: audioStat.size,
+      duration: selectedClip.duration,
+      jobId: job.id,
+      sunoClipId: selectedClip.id,
+    });
+
     // ── STEP 2: Gemini Thumbnail Generation ───────────────────────────────
     await updateJob(job.id, {
       currentStep: 2,
-      stepStatuses: ["done", "running", "pending", "pending", "pending"],
+      stepStatuses: ["done", "running", "pending", "pending", "pending", "pending"],
       waitingFor: null,
     });
 
-    // Thumbnail generation loop (allows regeneration)
     let thumbnailAccepted = false;
     let thumbAttempt = 0;
 
@@ -162,7 +171,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
       };
 
       await updateJob(job.id, {
-        stepStatuses: ["done", "done", "pending", "pending", "pending"],
+        stepStatuses: ["done", "done", "pending", "pending", "pending", "pending"],
         waitingFor: "thumbnail_review",
         waitingPayload: thumbPayload,
       });
@@ -175,11 +184,23 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
       if (thumbAction.action === "accept") {
         thumbnailAccepted = true;
         log("Thumbnail accepted.", "success");
+
+        // Save thumbnail asset
+        await createAsset({
+          type: "thumbnail",
+          title: job.title,
+          artists: job.artists,
+          style: job.style,
+          filePath: rawThumbPath,
+          fileName: "thumbnail_raw.jpg",
+          fileSize: thumbStat.size,
+          jobId: job.id,
+        });
       } else {
         log("Regenerating thumbnail...");
         emit("step", { step: 2, status: "running", progress: 0, message: "Regenerating..." });
         await updateJob(job.id, {
-          stepStatuses: ["done", "running", "pending", "pending", "pending"],
+          stepStatuses: ["done", "running", "pending", "pending", "pending", "pending"],
           waitingFor: null,
         });
       }
@@ -188,7 +209,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     // ── STEP 3: Branding Composite ─────────────────────────────────────────
     await updateJob(job.id, {
       currentStep: 3,
-      stepStatuses: ["done", "done", "running", "pending", "pending"],
+      stepStatuses: ["done", "done", "running", "pending", "pending", "pending"],
       waitingFor: null,
     });
 
@@ -197,13 +218,12 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
     await compositeThumbnail(rawThumbPath, thumbPath, job);
     log("Branded thumbnail saved.", "success");
-
     emit("step", { step: 3, status: "done", progress: 100, message: "Complete" });
 
     // ── STEP 4: Video Assembly ─────────────────────────────────────────────
     await updateJob(job.id, {
       currentStep: 4,
-      stepStatuses: ["done", "done", "done", "running", "pending"],
+      stepStatuses: ["done", "done", "done", "running", "pending", "pending"],
     });
 
     emit("step", { step: 4, status: "running", progress: 0, message: "Assembling video..." });
@@ -222,15 +242,98 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
     const videoStat = await fs.stat(videoPath);
     log(`Video saved: ${(videoStat.size / 1024 / 1024).toFixed(1)} MB`, "success");
-    emit("step", { step: 4, status: "done", progress: 100, message: "Complete" });
+    emit("step", { step: 4, status: "done", progress: 100, message: "Video ready — awaiting review" });
 
-    // ── STEP 5: Metadata Package ───────────────────────────────────────────
+    // ── STEP 5: Video Review ──────────────────────────────────────────────
     await updateJob(job.id, {
       currentStep: 5,
-      stepStatuses: ["done", "done", "done", "done", "running"],
+      stepStatuses: ["done", "done", "done", "done", "running", "pending"],
     });
 
-    emit("step", { step: 5, status: "running", progress: 0, message: "Building metadata..." });
+    emit("step", { step: 5, status: "running", progress: 0, message: "Awaiting video review..." });
+
+    const videoPayload = {
+      videoUrl: `/api/jobs/${job.id}/download?file=video`,
+      thumbnailUrl: `/api/jobs/${job.id}/download?file=thumbnail`,
+    };
+
+    await updateJob(job.id, {
+      stepStatuses: ["done", "done", "done", "done", "done", "pending"],
+      waitingFor: "video_review",
+      waitingPayload: videoPayload,
+    });
+
+    emit("awaiting_input", { type: "video_review", payload: videoPayload });
+    log("Waiting for video review...");
+
+    let videoAccepted = false;
+    while (!videoAccepted) {
+      const videoAction = (await waitForAction(job.id)) as {
+        action: "accept" | "re_render";
+        crf?: number;
+        audioBitrate?: string;
+      };
+
+      if (videoAction.action === "accept") {
+        videoAccepted = true;
+        log("Video accepted.", "success");
+        emit("step", { step: 5, status: "done", progress: 100, message: "Approved" });
+      } else {
+        log("Re-rendering video with new settings...");
+        emit("step", { step: 5, status: "running", progress: 0, message: "Re-rendering..." });
+        await updateJob(job.id, {
+          stepStatuses: ["done", "done", "done", "done", "running", "pending"],
+          waitingFor: null,
+        });
+
+        await assembleVideo({
+          thumbnailPath: thumbPath,
+          audioPath,
+          outputPath: videoPath,
+          title: job.title,
+          artists: job.artists,
+          crf: videoAction.crf,
+          audioBitrate: videoAction.audioBitrate,
+          onProgress: (percent) => {
+            emit("step", { step: 5, status: "running", progress: percent, message: `Re-encoding: ${percent}%` });
+          },
+        });
+
+        const newStat = await fs.stat(videoPath);
+        log(`Video re-rendered: ${(newStat.size / 1024 / 1024).toFixed(1)} MB`, "success");
+        emit("step", { step: 5, status: "done", progress: 100, message: "Video ready — awaiting review" });
+
+        await updateJob(job.id, {
+          stepStatuses: ["done", "done", "done", "done", "done", "pending"],
+          waitingFor: "video_review",
+          waitingPayload: videoPayload,
+        });
+        emit("awaiting_input", { type: "video_review", payload: videoPayload });
+        log("Waiting for video review...");
+      }
+    }
+
+    // Save video asset
+    const finalVideoStat = await fs.stat(videoPath);
+    await createAsset({
+      type: "video",
+      title: job.title,
+      artists: job.artists,
+      style: job.style,
+      filePath: videoPath,
+      fileName: `${safeName}_PIROS_TAPE.mp4`,
+      fileSize: finalVideoStat.size,
+      jobId: job.id,
+    });
+
+    // ── STEP 6: Metadata Package ───────────────────────────────────────────
+    await updateJob(job.id, {
+      currentStep: 6,
+      stepStatuses: ["done", "done", "done", "done", "done", "running"],
+      waitingFor: null,
+    });
+
+    emit("step", { step: 6, status: "running", progress: 0, message: "Building metadata..." });
     log("Generating YouTube metadata...");
 
     let huScene = "";
@@ -248,12 +351,12 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     await fs.writeFile(metadataPath, metadataText, "utf-8");
     log("Metadata saved.", "success");
 
-    emit("step", { step: 5, status: "done", progress: 100, message: "Complete" });
+    emit("step", { step: 6, status: "done", progress: 100, message: "Complete" });
 
     await updateJob(job.id, {
       status: "complete",
-      currentStep: 5,
-      stepStatuses: ["done", "done", "done", "done", "done"],
+      currentStep: 6,
+      stepStatuses: ["done", "done", "done", "done", "done", "done"],
       completedAt: new Date().toISOString(),
       waitingFor: null,
     });

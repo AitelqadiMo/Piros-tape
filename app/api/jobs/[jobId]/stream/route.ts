@@ -8,7 +8,7 @@ function buildReplay(job: NonNullable<Awaited<ReturnType<typeof getJob>>>) {
   const events: Array<{ event: string; data: unknown }> = [];
 
   if (job.status === "complete" || job.status === "legacy") {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       events.push({
         event: "step",
         data: { step: i + 1, status: "done", progress: 100, message: "Complete" },

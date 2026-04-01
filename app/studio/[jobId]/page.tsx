@@ -8,6 +8,7 @@ import LogStream from "@/components/LogStream";
 import MetadataBlock from "@/components/MetadataBlock";
 import SongSelector, { SongClip } from "@/components/SongSelector";
 import ThumbnailReview from "@/components/ThumbnailReview";
+import VideoReview from "@/components/VideoReview";
 import { Job, PIPELINE_STEPS, PipelineLogEvent, StepStatus } from "@/lib/types";
 
 interface StepState {
@@ -23,20 +24,23 @@ interface JobResponse {
 
 type AwaitingInputEvent =
   | { type: "song_selection"; payload: { clips?: SongClip[] } }
-  | { type: "thumbnail_review"; payload: { thumbnailUrl?: string } };
+  | { type: "thumbnail_review"; payload: { thumbnailUrl?: string } }
+  | { type: "video_review"; payload: { videoUrl?: string; thumbnailUrl?: string } };
 
 type ConnectionState = "connecting" | "live" | "retrying" | "offline";
 
 type AwaitingState =
   | null
   | { type: "song_selection"; clips: SongClip[] }
-  | { type: "thumbnail_review"; thumbnailUrl: string };
+  | { type: "thumbnail_review"; thumbnailUrl: string }
+  | { type: "video_review"; videoUrl: string; thumbnailUrl: string };
 
 const STEP_HINTS = [
   "Sending the music brief to Suno and waiting for two takes.",
   "Generating thumbnail concepts with Gemini.",
   "Applying PIROS TAPE branding and final composition.",
   "Rendering the final video with FFmpeg.",
+  "Review the assembled video before finalizing.",
   "Writing title, description, and delivery metadata.",
 ];
 
@@ -70,6 +74,7 @@ function getStatusLabel(job: Job | null, awaiting: AwaitingState) {
   if (!job) return "Loading";
   if (awaiting?.type === "song_selection") return "Choose variation";
   if (awaiting?.type === "thumbnail_review") return "Review thumbnail";
+  if (awaiting?.type === "video_review") return "Review video";
   if (job.status === "complete" || job.status === "legacy") return "Complete";
   if (job.status === "error") return "Failed";
   if (job.status === "running") return "In production";
@@ -99,6 +104,15 @@ function mapWaitingState(job: Job | null): AwaitingState {
     return { type: "thumbnail_review", thumbnailUrl: url };
   }
 
+  if (job.waitingFor === "video_review") {
+    const payload = job.waitingPayload as { videoUrl?: string; thumbnailUrl?: string };
+    return {
+      type: "video_review",
+      videoUrl: payload.videoUrl || "",
+      thumbnailUrl: payload.thumbnailUrl || "",
+    };
+  }
+
   return null;
 }
 
@@ -121,6 +135,7 @@ function buildNextAction(job: Job | null, awaiting: AwaitingState) {
   if (!job) return "Loading production brief.";
   if (awaiting?.type === "song_selection") return "Listen to both variations and choose the keeper.";
   if (awaiting?.type === "thumbnail_review") return "Approve the thumbnail or ask for another pass.";
+  if (awaiting?.type === "video_review") return "Review the video. Adjust settings and re-render, or approve.";
   if (job.status === "complete" || job.status === "legacy") return "Download the assets and metadata package.";
   if (job.status === "error") return "Review the error log and restart from a fresh job.";
   if (job.status === "pending") return "Starting the pipeline engine.";
@@ -252,6 +267,15 @@ export default function JobPage() {
             ? `${data.payload.thumbnailUrl}${data.payload.thumbnailUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
             : "";
           setAwaiting({ type: "thumbnail_review", thumbnailUrl: url });
+        }
+
+        if (data.type === "video_review") {
+          const payload = data.payload as { videoUrl?: string; thumbnailUrl?: string };
+          setAwaiting({
+            type: "video_review",
+            videoUrl: payload.videoUrl || "",
+            thumbnailUrl: payload.thumbnailUrl || "",
+          });
         }
       });
 
@@ -467,6 +491,22 @@ export default function JobPage() {
             </section>
           )}
 
+          {awaiting?.type === "video_review" && (
+            <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+              <div className="mb-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-tape">Decision Required</p>
+                <h2 className="mt-2 font-display text-2xl text-paper">Review The Final Video</h2>
+                <p className="mt-1 font-body text-sm text-dust">Watch the video. Adjust quality settings and re-render if needed, or approve to continue.</p>
+              </div>
+              <VideoReview
+                videoUrl={awaiting.videoUrl}
+                thumbnailUrl={awaiting.thumbnailUrl}
+                onAccept={() => sendAction("video_review", { action: "accept" })}
+                onReRender={(settings) => sendAction("video_review", { action: "re_render", ...settings })}
+              />
+            </section>
+          )}
+
           {completed && (
             <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
               <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
@@ -481,6 +521,12 @@ export default function JobPage() {
                   <a href={`/api/jobs/${jobId}/download?file=thumbnail`} className="btn-secondary text-center">
                     Thumbnail
                   </a>
+                  <a href={`/api/jobs/${jobId}/download?file=audio`} className="btn-secondary text-center">
+                    Audio
+                  </a>
+                  <Link href="/assets" className="btn-secondary text-center">
+                    Assets
+                  </Link>
                 </div>
               </div>
 

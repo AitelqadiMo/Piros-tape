@@ -5,9 +5,12 @@ import { usePathname } from "next/navigation";
 
 const navLinks = [
   { href: "/", label: "Dashboard" },
-  { href: "/studio", label: "Studio" },
+  { href: "/studio", label: "Pipeline" },
+  { href: "/music", label: "Music" },
+  { href: "/thumbnails", label: "Thumbnails" },
+  { href: "/video", label: "Video" },
+  { href: "/assets", label: "Assets" },
   { href: "/jobs", label: "Jobs" },
-  { href: "/catalog", label: "Catalog" },
   { href: "/settings", label: "Settings" },
 ];
 

@@ -15,9 +15,11 @@ export async function GET(
   }
 
   const file = request.nextUrl.searchParams.get("file");
-  if (!file || !["video", "thumbnail", "thumbnail_raw", "metadata"].includes(file)) {
-    return NextResponse.json({ error: "Invalid file type. Use: video, thumbnail, thumbnail_raw, metadata" }, { status: 400 });
+  if (!file || !["video", "thumbnail", "thumbnail_raw", "metadata", "audio"].includes(file)) {
+    return NextResponse.json({ error: "Invalid file type. Use: video, thumbnail, thumbnail_raw, metadata, audio" }, { status: 400 });
   }
+
+  const inline = request.nextUrl.searchParams.get("inline") === "1";
 
   const base = process.env.OUTPUT_DIR || "./output";
   const outputDir = job.outputDir || path.resolve(/*turbopackIgnore: true*/ base, jobId);
@@ -49,16 +51,22 @@ export async function GET(
       contentType = "text/plain; charset=utf-8";
       fileName = `${safeName}_metadata.txt`;
       break;
+    case "audio":
+      filePath = path.join(outputDir, "song.mp3");
+      contentType = "audio/mpeg";
+      fileName = `${safeName}_song.mp3`;
+      break;
     default:
       return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
   }
 
   try {
     const data = await fs.readFile(filePath);
+    const disposition = inline ? `inline; filename="${fileName}"` : `attachment; filename="${fileName}"`;
     return new Response(data, {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Disposition": disposition,
         "Content-Length": String(data.length),
       },
     });

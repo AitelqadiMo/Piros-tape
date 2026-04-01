@@ -91,11 +91,27 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Start new track button */}
+      {/* Quick actions */}
       <div className="animate-fade-in animate-delay-1">
-        <Link href="/studio" className="btn-primary inline-block text-center w-full md:w-auto">
-          Start New Track
-        </Link>
+        <h2 className="font-display text-xl text-paper mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/studio" className="p-4 bg-noir-2 border-[0.5px] border-crimson/30 hover:border-crimson/60 transition-colors text-center" style={{ borderRadius: "2px" }}>
+            <span className="block font-mono text-xs text-crimson uppercase tracking-wider">Pipeline</span>
+            <span className="block font-body text-sm text-ash mt-1">Full production</span>
+          </Link>
+          <Link href="/music" className="p-4 bg-noir-2 border-[0.5px] border-tape/20 hover:border-tape/40 transition-colors text-center" style={{ borderRadius: "2px" }}>
+            <span className="block font-mono text-xs text-tape uppercase tracking-wider">Music</span>
+            <span className="block font-body text-sm text-ash mt-1">Generate songs</span>
+          </Link>
+          <Link href="/thumbnails" className="p-4 bg-noir-2 border-[0.5px] border-tape/20 hover:border-tape/40 transition-colors text-center" style={{ borderRadius: "2px" }}>
+            <span className="block font-mono text-xs text-tape uppercase tracking-wider">Thumbnails</span>
+            <span className="block font-body text-sm text-ash mt-1">Generate artwork</span>
+          </Link>
+          <Link href="/video" className="p-4 bg-noir-2 border-[0.5px] border-tape/20 hover:border-tape/40 transition-colors text-center" style={{ borderRadius: "2px" }}>
+            <span className="block font-mono text-xs text-tape uppercase tracking-wider">Video</span>
+            <span className="block font-body text-sm text-ash mt-1">Assemble MP4</span>
+          </Link>
+        </div>
       </div>
 
       {/* Recent jobs table */}

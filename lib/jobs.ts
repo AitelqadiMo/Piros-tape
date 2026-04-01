@@ -40,7 +40,7 @@ export async function createJob(
     id,
     status: "pending",
     currentStep: 0,
-    stepStatuses: ["pending", "pending", "pending", "pending", "pending"],
+    stepStatuses: ["pending", "pending", "pending", "pending", "pending", "pending"],
     createdAt: new Date().toISOString(),
   };
   jobs.push(job);

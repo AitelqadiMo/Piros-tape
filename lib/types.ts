@@ -72,11 +72,17 @@ export interface ThumbnailReviewPayload {
   thumbnailUrl: string; // served via /api/jobs/[id]/download?file=thumbnail_raw
 }
 
-export type AwaitingInputType = "song_selection" | "thumbnail_review";
+export interface VideoReviewPayload {
+  videoUrl: string;
+  thumbnailUrl: string;
+  duration?: number;
+}
+
+export type AwaitingInputType = "song_selection" | "thumbnail_review" | "video_review";
 
 export interface AwaitingInputEvent {
   type: AwaitingInputType;
-  payload: SongSelectionPayload | ThumbnailReviewPayload;
+  payload: SongSelectionPayload | ThumbnailReviewPayload | VideoReviewPayload;
 }
 
 export interface ResearchCandidate {
@@ -102,5 +108,26 @@ export const PIPELINE_STEPS = [
   { number: 2, name: "THUMBNAIL — GEMINI" },
   { number: 3, name: "BRANDING COMPOSITE" },
   { number: 4, name: "VIDEO ASSEMBLY" },
-  { number: 5, name: "METADATA PACKAGE" },
+  { number: 5, name: "VIDEO REVIEW" },
+  { number: 6, name: "METADATA PACKAGE" },
 ];
+
+// ── Asset System ──────────────────────────────────────────────────────────────
+
+export type AssetType = "song" | "thumbnail" | "video";
+
+export interface Asset {
+  id: string;
+  type: AssetType;
+  title: string;
+  artists: string;
+  style?: StyleName;
+  filePath: string;
+  fileName: string;
+  fileSize?: number;
+  duration?: number;
+  jobId?: string;
+  sunoClipId?: string;
+  createdAt: string;
+  meta?: Record<string, unknown>;
+}
