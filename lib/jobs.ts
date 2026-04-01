@@ -7,11 +7,13 @@ const JOBS_FILE = path.join(process.cwd(), "jobs.json");
 let jobsCache: Job[] | null = null;
 
 export async function readJobs(): Promise<Job[]> {
-  if (jobsCache) return jobsCache;
+  // Always read fresh from disk during pipeline execution (no caching)
+  // This ensures we see real-time updates
   try {
     const data = await fs.readFile(JOBS_FILE, "utf-8");
-    jobsCache = JSON.parse(data) as Job[];
-    return jobsCache;
+    const jobs = JSON.parse(data) as Job[];
+    jobsCache = jobs;
+    return jobs;
   } catch {
     jobsCache = [];
     return jobsCache;

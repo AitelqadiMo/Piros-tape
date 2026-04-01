@@ -265,6 +265,6 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     const updated = await updateJob(job.id, { status: "error", waitingFor: null });
     const step = updated?.currentStep ?? 1;
     log(`Error at step ${step}: ${message}`, "error");
-    emit("error", { step, message });
+    emit("pipeline_error", { step, message });
   }
 }

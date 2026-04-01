@@ -296,5 +296,173 @@
     "createdAt": "2026-03-31T17:58:37.799Z",
     "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774979917799-x7bgru",
     "waitingFor": null
+  },
+  {
+    "artists": "Beton.Hofi × TIRPA × Sub Bass Monster",
+    "title": "PEZSGŐ ÉJ",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 118,
+    "budapestYear": 1974,
+    "moodLine": "euphoric, danceable, electric — a rooftop party above the city, Budapest 1974",
+    "lyrics": "Pezsgő éj\nPezsgő éj\nPezsgő éj\n\nÉs te, hol voltál eddig?\nÉn meg a gangen, szívom a szendvicset\nOlyan vagyok, mint a kisfiam, nem értem a rendszert\nDe úgyse számít, megvan a jelszó\nPezsgő éj van, édesem, ez pezsgő éj, nem jelszó\nHa kőbe vésik, azt is kimossa a víz\nMint a geci arcunkat a szép idő meg a smink\nÉs mindegy, nem számít, ha nem érte meg, nem kéri vissza\nKölcsönkenyér, meg kőolajszármazék, meg pizza\nÉs szívom a cigit a gépbe\nNem is gondolkodom, csak írok\nMajd felmegyek Pestre, rágyújtok\nNem mondom, hogy nem éreztem ilyet\nDe most nem érzem, nem érzem ezt a szikrát\nNem tudom, mitől, de nem szívom a szívást\nMost valami mást, valami különlegesebbet\n\nPezsgő éj, pezsgő éj\nPezsgő éj, pezsgő éj\n\nPezsgő éj, pezsgő éj, pezsgő éj van, édesem\nIgen, a faszomnak se kell már a sötét fekete ékszer\nAz utcákon a zaj, a basszus, ami felkap, aztán elvág\nKérek még egyet, nem érdekel, hogy most szétbasz\nÉs már nem látom, amit akarok, vagy amit te akarsz\nA szívem az ég, én meg egy tűzgolyó, ami elkap\nÉs már nem kapom el, én meg egy sárkány vagyok, ami elrepül\nAz óceán meg az ég, a kettő együtt már elmerül\nÉs akkor nem vagyok, nem vagyok sehol\nNem látok semmit, csak az eget meg a fejem\nÉs pezsgő éj van, pezsgő éj, pezsgő éj\nMég szexi is vagyok, még szexi is vagyok\n\nPezsgő éj, pezsgő éj (Azt hiszem, még egyedül is)\nPezsgő éj, pezsgő éj (Körbejártuk az egész Földet)\n\nBeton, Sub Bass, Tirpa, meg a pezsgő\nA három T, a három fő, akik téged elvisznek a messzi mezőbe\nAhova csak a szív visz, ahova csak a vér visz\nAhol a szerelem, az már nem egy kényes, apró részlet\nAhol a szerelem, az már mindent elvisz\nAhol a szerelem, az már mindent visz\nEgy pohárba töltöm, egy pohárba töltöm a szívét\nEgy pohárba töltöm, egy pohárba töltöm a vérét\nAztán feliszom, föliszom az egészet\nÉs már nem látok, nem látok semmit\nCsak a pezsgőt, csak a pezsgőt, csak a pezsgőt, csak a pezsgőt\n\nPezsgő éj, pezsgő éj\nPezsgő éj, pezsgő éj\n\nPezsgő éj\nPezsgő éj\nPezsgő éj\nPezsgő éj\nPezsgő éj\nPezsgő éj\nPezsgő éj\nPezsgő éj",
+    "id": "job-1774980483712-qiu14o",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T18:08:03.712Z"
+  },
+  {
+    "artists": "Test Artist 1",
+    "title": "TEST TRACK NEW",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 100,
+    "budapestYear": 1970,
+    "moodLine": "test mood",
+    "id": "job-1774981593929-wos0j2",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "running",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T18:26:33.929Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774981593929-wos0j2",
+    "waitingFor": null
+  },
+  {
+    "artists": "Test Artist",
+    "title": "TEST GENERATION",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 95,
+    "budapestYear": 1970,
+    "moodLine": "test generation",
+    "id": "job-1774981916768-6kb2h4",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T18:31:56.768Z"
+  },
+  {
+    "artists": "Quick Test",
+    "title": "QUICK TEST TRACK",
+    "style": "Funk Soul",
+    "decade": "1970",
+    "bpm": 90,
+    "budapestYear": 1970,
+    "moodLine": "test",
+    "id": "job-1774982016264-ii88ay",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T18:33:36.264Z"
+  },
+  {
+    "artists": "Sub Bass Monster",
+    "title": "CSILLAGOK ALATT",
+    "style": "Cold War Funk Noir",
+    "decade": "1960",
+    "bpm": 112,
+    "budapestYear": 1968,
+    "moodLine": "paranoid, political, apocalyptic — a government broadcast from a collapsing empire, Budapest 1968",
+    "lyrics": "SBM:\nHallottam én már, hogy van fenn valaki\nÉs az onnan fentről néz minket lent, hogy miket csinálunk\nMegállapítom, hogy nem sokat segített eddig\nDe reménykedek benne, hogy legalább szurkol nekünk\n\nRefrén:\nCsillagok alatt nézlek, miért vagy magányos\nAz égbe kiáltok, hogy neked is legyen párod\nCsillagok alatt nézlek, miért vagy magányos\nAz égbe kiáltok, hogy neked is legyen párod\nMiért? Miért?\nMiért? Miért?\n\nSBM:\nFelmegyek a hegyre, de nem találom\nA napot, a holdat, a csillagom\nAzt mondják, hogy az ember boldogsága\nCsak a saját kezében van, de én nem hiszem\n\nRefrén:\nCsillagok alatt nézlek, miért vagy magányos\nAz égbe kiáltok, hogy neked is legyen párod\nCsillagok alatt nézlek, miért vagy magányos\nAz égbe kiáltok, hogy neked is legyen párod\nMiért? Miért?\nMiért? Miért?\n\nSBM:\nLehet, hogy ez a sors, amit nekem szántak\nDe én nem akarom elfogadni, nem fogadom\nHarcolok, ameddig csak bírok\nMert tudom, hogy egyszer majd eljön az én napom is\n\nRefrén:\nCsillagok alatt nézlek, miért vagy magányos\nAz égbe kiáltok, hogy neked is legyen párod\nCsillagok alatt nézlek, miért vagy magányos\nAz égbe kiáltok, hogy neked is legyen párod\nMiért? Miért?\nMiért? Miért?",
+    "id": "job-1774982504475-naip3f",
+    "status": "pending",
+    "currentStep": 0,
+    "stepStatuses": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T18:41:44.475Z"
+  },
+  {
+    "artists": "Funktasztikus × Bankos",
+    "title": "VASFÜGGÖNY ÁRNYÉKÁBAN",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 90,
+    "budapestYear": 1974,
+    "moodLine": "euphoric, danceable, electric — a rooftop party above the city, Budapest 1974",
+    "lyrics": "Yo, Funktasztikus\nBankos\nFunktasztikus\nBankos\nYo\nMikor én kicsi voltam, még VASFÜGGÖNY ÁRNYÉKÁBAN\nBeszélni tanuló\nA mama mesélt, hogy nem értik a felnőttek\nMinek az utca, a sötét, fáklyás tömeg\nAmi a téren tivornyáz, a kámzsás pap és a feszület\nGyerek voltam még, de látom a felvételt\nA harci terepen a páncélosok, a géppisztoly a kezében\nA lázongó tömeg, az állig felfegyverkezett hadsereg\nMegszökött a vécén át, menekül a rezsim\nÉs a nép forrong, és a dühös sereg megöli\nKörülötte mindenki sír, öröm sír, hogy végre vége\nMiért sírtok kérdeztem, és a felnőttek nem értik\nDe sírt a testvér, a mama és a papa\nGyerek voltam még, de megértem, hogy mi történt az apával\nA lázadás után, mikor a düh elszáll\nÉs a vaskezű hatalom elfojtja a lángot, elfojtja a lázálom\nMikor a szabadságot ígérő álmok elmúltak\nÉs a bilincs a kezén marad, és az agyában a múlt marad\nMiért nem szólsz, papa, miért nem mondod el, hogy mi volt\nA hideg tél, a sötét, a szomjas és az éhező\nA hideg téli nap, a reménytelenség, a börtön\nMiért nem szólsz, papa, miért nem mondod el, hogy mi történt\nMikor a szabadságot ígérő álmok elmúltak\nÉs a bilincs a kezén maradt, és az agyában a múlt maradt\nVASFÜGGÖNY ÁRNYÉKÁBAN nőttem fel én\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a szabadság volt a vágy\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a remény volt a tűz\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a jázmin virágzik\nSzóljál mama, szóljál papa, szóljon a nagymama is\nMeséljenek, hogy milyen volt, mikor a Vasfüggöny ájult\nMikor a falak leomlottak, és a világ kinyílt\nMikor a szabadság szele fújt, és a szív dobogott\nMikor az utcák megteltek, és a nevetés zengte a tért\nMikor a remény lángja égett, és a jövő fényes volt\nMikor a bilincsek leestek, és a lélek szabadon szállt\nMikor a szabadság dalát énekelték, és a szív szárnyalt\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a hazugság volt a kenyér\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a félelem volt a hóhér\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a hallgatás volt a törvény\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a hazugság volt a jegy\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a remény volt a tűz\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a jázmin virágzik\nÉn még emlékszem, hogy anyám mesélt erről\nHogy a VASFÜGGÖNY ÁRNYÉKÁBAN éltünk akkor\nMikor a szabadság csak álom volt, és a remény halott\nMikor a falak leomlottak, és a világ kinyílt\nMikor a szabadság szele fújt, és a szív dobogott\nMikor az utcák megteltek, és a nevetés zengte a tért\nMikor a remény lángja égett, és a jövő fényes volt\nMikor a bilincsek leestek, és a lélek szabadon szállt\nMikor a szabadság dalát énekelték, és a szív szárnyalt\nVASFÜGGÖNY ÁRNYÉKÁBAN nőttem fel én\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a szabadság volt a vágy\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a remény volt a tűz\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a jázmin virágzik\nVASFÜGGÖNY ÁRNYÉKÁBAN nőttem fel én\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a szabadság volt a vágy\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a remény volt a tűz\nVASFÜGGÖNY ÁRNYÉKÁBAN, ahol a jázmin virágzik\nYo, Funktasztikus\nBankos\n2023\nMi vagyunk azok, akik\nEzt átéltük\nA Vasfüggöny árnyékában",
+    "id": "job-1774983442451-g0dwp2",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "done",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T18:57:22.451Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774983442451-g0dwp2",
+    "waitingFor": null,
+    "waitingPayload": {
+      "clips": [
+        {
+          "id": "9667f410-c706-4e29-a683-c9ceb6644c12",
+          "streamUrl": "https://musicfile.removeai.ai/OTY2N2Y0MTAtYzcwNi00ZTI5LWE2ODMtYzljZWI2NjQ0YzEy",
+          "audioUrl": "https://tempfile.aiquickdraw.com/r/10a977cb6f9045f0916044e218834cdd.mp3",
+          "title": "VASFÜGGÖNY ÁRNYÉKÁBAN",
+          "duration": 382.64
+        },
+        {
+          "id": "7bdfa2e9-837e-40ce-aaa6-a6073fa834c8",
+          "streamUrl": "https://musicfile.removeai.ai/N2JkZmEyZTktODM3ZS00MGNlLWFhYTYtYTYwNzNmYTgzNGM4",
+          "audioUrl": "https://tempfile.aiquickdraw.com/r/c733d33363d440789d866fee5a2338ad.mp3",
+          "title": "VASFÜGGÖNY ÁRNYÉKÁBAN",
+          "duration": 289.96
+        }
+      ]
+    }
+  },
+  {
+    "artists": "TIRPA × Siska Finuccsi",
+    "title": "PANEL PRÓFÉTÁK",
+    "style": "Funk Noir",
+    "decade": "1960",
+    "bpm": 88,
+    "budapestYear": 1968,
+    "moodLine": "dark, cinematic, urban night — smoky basement club in Budapest, 1968",
+    "lyrics": "(Intro: Siska Finuccsi)\nAh, Siska Finuccsi, Tirpa\nGhetto Budapest, meg Dévaványa\nKeresd meg a különbséget\nOtt van az a híg fos, meg ott van a lényeg\nAh, ah\n\n(1. verze: Tirpa)\nGondold újra, amit láttál\nFincsiék, ahol nőtél, ahol éltél, ahol laktál\nOtt van a haveromnak panelpróféták\nAhogy az orrom hegyét, úgy szúrom a gecibe azokat, amiket lenn tegnap előtt láttam\nAh, ez még a kezdő, kezdő tőke\nÉs mondd, mi az a kezdő tőke?\nEz a tirpátlanság, amiből mindenki profitál\nAkkor, amikor a Fincsi a stúdióba befut, és mondja, hogy baszd meg\nEz az a stílus, ami most megy\nAkkor, amikor kitaláltam az összes olyan szót\nAmiről már azt mondta a Dancsó Petya is, hogy baszd meg\nEz az a tirpátlanság, ahogy a Balázsék is rájönnek arra\nHogy ez a stílus, ami megy\nAkkor, amikor látod, hogy ez az a tirpátlanság\nAmi mindig bejön, akkor, amikor kussolsz\nÉs azt mondom, hogy baszd meg\nA Fincsi úgy látja, hogy ez a Dévaványa\nÉs te, te tudod, hogy ez a Dévaványa\nTe tudod, hogy ez a Dévaványa\nAhol lakom\nÉs te tudod, hogy ott, ahol lakom, ott a panel\nOtt van a panel, és ott vannak a panelpróféták\nÉs akkor, amikor látod, hogy a panelpróféták, azok mit csinálnak\nAkkor te tudod, hogy azok azt csinálják, amik ők\nÉs akkor te tudod, hogy baszd meg\nEz a Fincsi úgy látja, hogy a Tirpa a stúdióba befut, és mondja, hogy ez a Dévaványa\nÉs te tudod, hogy ez a Dévaványa\nAhol lakom\nÉs te tudod, hogy ez az a Dévaványa\nAhol lakom\nÉs akkor, amikor hallod azt, hogy a Tirpa azt mondja, hogy baszd meg\nEz a Fincsi úgy látja, hogy a Tirpa a stúdióba befut\nÉs te tudod, hogy ez az a Tirpa, akit te látsz\nÉs te tudod, hogy ez az a Tirpa, akit te látsz\nÉs te tudod, hogy ez az a Tirpa, akit te látsz\nÉs akkor, amikor látod, hogy a Fincsi is úgy látja\nHogy baszd meg, ez a Tirpa az, aki a Fincsi mellett fut\nAkkor te tudod, hogy ez a Dévaványa\nAhol lakom\nAhol lakom\nÉs akkor, amikor te tudod azt, hogy a Fincsi is\nAkkor, amikor azt mondom, hogy baszd meg\nA Fincsi is úgy látja, hogy a Tirpa\nA stúdióba befut, és mondja, hogy baszd meg\nAkkor, amikor látod, hogy ez az a Fincsi\nAki a Tirpa mellett van\nAkkor te tudod, hogy ez az a Dévaványa\nAhol lakom\n\n(2. verze: Siska Finuccsi)\nA Tirpa a stúdióba befut, mert látja, hogy Siska Finuccsi\nVáltoztat a dolgokon, na, akkor nézzük!\nNem számít a pénz, ha nincsen melletted\nEgy igazi társ, aki érti, amit mondasz, amit élsz\nAmit érzel, és átél a stúdióba befut\nÉs mindenki azt mondja, hogy Tirpa, fasza\nMert ő az, aki átérez, és tudja\nHogy a panel az az, ahol az igazi dolgok mennek\nNem a nagy ház, nem a puccos kocsi\nHanem ott a gangon, ott a betonon\nOtt van az, ahol te, mi mindent láttál\nOtt van az a híg fos, meg ott van az a pénz\nOtt van az a pénz, amit te szerzel meg\nÉs utána elkapsz, és te tudod\nHogy a panel az az, ahova te tartozol\nA panel az az, ahova te tartozol\nÉs te tudod, hogy a Tirpa\nA Dévaványai panelben látta meg a dolgokat\nÉs ő az, aki tudja, és tudja\nHogy te, te, te érzed az, hogy ez\nA Panelpróféták, ez az a dal\nAhol mindenki azt mondja, hogy ez az, ez a Tirpa\nEz a Siska Finuccsi\nÉs ez az, aki tudja, hogy a panel az az, ahol\nMindenki azt mondja, hogy ez az\nEz az igazi hip-hop\nEz az igazi szöveg, nem az, amit te hallasz\nA rádióban, nem az, amit te látsz\nOtt a TV-ben, hanem ez az, ahol te\nMindenki tudja, hogy ez az, ez az igazi szöveg\nEz az igazi szöveg\nÉs te, te tudod, hogy a Tirpa\nA Tirpa az az, aki befut a stúdióba\nÉs azt mondja, hogy baszd meg\nSiska Finuccsi, ez az, ami kell!\nÉs te, te tudod, hogy a panel az az\nAhol te, te mindent láttál\nÉs ott van az a híg fos, meg ott van a pénz\nÉs te, te tudod, hogy a panel az az\nAhol te, te mindent láttál\nÉs te, te tudod, hogy ez az\nEz az igazi szöveg\nEz az igazi szöveg\n\n(Outro: Siska Finuccsi)\nGhetto Budapest\nSiska Finuccsi\nTirpa\nPanelpróféták\nAh, ah\nTirpa, Siska Finuccsi\nGhetto Budapest, meg Dévaványa\nPanelpróféták\nAh, ah\nAh, ah\nAh, ah\nTirpa, Siska Finuccsi\nPanelpróféták\nGhetto Budapest\nDévaványa\nAh, ah\nAh, ah\nEz az\nEz az\nEz az\nEz az\nEz az\nEz az\nAh\nMindenki\nAh\nTirpa, Siska Finuccsi\nPanelpróféták\nGhetto Budapest, Dévaványa\nAh, ah\nAh, ah\nAh, ah\nAh, ah\nSiska Finuccsi\nTirpa\nPanelpróféták\nGhetto Budapest\nDévaványa\nAh, ah",
+    "id": "job-1774984326950-ozwukp",
+    "status": "error",
+    "currentStep": 1,
+    "stepStatuses": [
+      "running",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "createdAt": "2026-03-31T19:12:06.950Z",
+    "outputDir": "/Users/mohammedaitelqadi/Piros-tape/output/job-1774984326950-ozwukp",
+    "waitingFor": null
   }
 ]
