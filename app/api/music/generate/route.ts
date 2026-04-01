@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateMusic, pollClips, downloadAudio } from "@/lib/suno";
+import { generateTwoVariations, saveLyriaAudio } from "@/lib/lyria";
 import { createAsset } from "@/lib/assets";
 import { promises as fs } from "fs";
 import path from "path";
@@ -8,20 +8,20 @@ export const maxDuration = 600;
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { prompt, style, title, artists } = body as {
+  const { prompt, title, artists, useClip } = body as {
     prompt: string;
-    style: string;
     title: string;
     artists?: string;
+    useClip?: boolean;
   };
 
-  const apiKey = process.env.SUNO_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "SUNO_API_KEY not configured" }, { status: 500 });
+    return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
   }
 
-  if (!prompt || !style || !title) {
-    return NextResponse.json({ error: "prompt, style, and title are required" }, { status: 400 });
+  if (!prompt || !title) {
+    return NextResponse.json({ error: "prompt and title are required" }, { status: 400 });
   }
 
   // Stream progress via SSE
@@ -33,29 +33,29 @@ export async function POST(request: NextRequest) {
       };
 
       try {
-        send("log", { message: "Submitting to Suno API..." });
-        const initialClips = await generateMusic({ prompt, style, title, apiKey });
-        send("log", { message: `${initialClips.length} clips queued, polling...` });
+        send("log", { message: "Submitting to Lyria 3 Pro..." });
+        send("progress", { percent: 10 });
 
-        const clips = await pollClips(initialClips, apiKey, (attempt, statuses) => {
-          send("progress", { attempt, statuses, percent: Math.min(90, attempt * 3) });
+        send("log", { message: "Generating 2 variations (this may take a few minutes)..." });
+        const variations = await generateTwoVariations({
+          prompt,
+          apiKey,
+          useClip,
         });
 
-        send("log", { message: "Clips ready, downloading..." });
+        send("log", { message: `${variations.length} variations generated` });
+        send("progress", { percent: 80 });
 
-        // Download all clips and save as assets
+        // Save all variations as assets
         const outputDir = path.resolve(process.env.OUTPUT_DIR || "./output", "standalone");
         await fs.mkdir(outputDir, { recursive: true });
 
         const savedAssets = [];
-        for (let i = 0; i < clips.length; i++) {
-          const clip = clips[i];
-          const audioUrl = clip.audio_url || clip.stream_url;
-          if (!audioUrl) continue;
-
+        for (let i = 0; i < variations.length; i++) {
+          const variation = variations[i];
           const fileName = `${title.replace(/[^a-zA-Z0-9]/g, "_")}_v${i + 1}_${Date.now()}.mp3`;
           const filePath = path.join(outputDir, fileName);
-          await downloadAudio(audioUrl, filePath);
+          await saveLyriaAudio(variation, filePath);
           const stat = await fs.stat(filePath);
 
           const asset = await createAsset({
@@ -65,13 +65,13 @@ export async function POST(request: NextRequest) {
             filePath,
             fileName,
             fileSize: stat.size,
-            duration: clip.duration,
-            sunoClipId: clip.id,
           });
           savedAssets.push(asset);
+          send("log", { message: `Variation ${i + 1} saved: ${(stat.size / 1024 / 1024).toFixed(1)} MB` });
         }
 
-        send("complete", { assets: savedAssets, clips });
+        send("progress", { percent: 100 });
+        send("complete", { assets: savedAssets });
       } catch (err) {
         send("error", { message: err instanceof Error ? err.message : String(err) });
       } finally {

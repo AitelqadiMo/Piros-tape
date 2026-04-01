@@ -11,7 +11,7 @@ import {
   buildYouTubeDescription,
   buildScenePrompt,
 } from "./prompts";
-import { generateMusic, pollClips, downloadAudio, SunoClip } from "./suno";
+import { generateTwoVariations, saveLyriaAudio, LyriaResult } from "./lyria";
 import { generateThumbnail, generateSceneDescription } from "./gemini";
 import { compositeThumbnail } from "./branding";
 import { assembleVideo } from "./ffmpeg";
@@ -31,12 +31,8 @@ function safeFileName(title: string): string {
 export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
   console.log(`[Pipeline.runPipeline] Starting for job ${job.id}`);
 
-  const sunoKey = process.env.SUNO_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
 
-  if (!sunoKey || sunoKey === "your_suno_key_here") {
-    throw new Error("SUNO_API_KEY not configured");
-  }
   if (!geminiKey || geminiKey === "your_gemini_key_here") {
     throw new Error("GEMINI_API_KEY not configured");
   }
@@ -67,43 +63,42 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
   };
 
   try {
-    // ── STEP 1: Suno Music Generation ─────────────────────────────────────
-    emit("step", { step: 1, status: "running", progress: 0, message: "Submitting to Suno API..." });
-    log("Submitting to Suno API (sunoapi.org)...");
+    // ── STEP 1: Lyria 3 Music Generation ─────────────────────────────────
+    emit("step", { step: 1, status: "running", progress: 0, message: "Generating with Lyria 3 Pro..." });
+    log("Submitting to Lyria 3 Pro (Google Gemini)...");
 
-    const sunoPrompt = buildSunoPrompt(job);
-    const sunoStyle = buildSunoStyle(job);
-    log(`Style: ${sunoStyle}`);
-    log(`Prompt length: ${sunoPrompt.length} chars`);
+    const lyriaPrompt = `${buildSunoStyle(job)}\n\n${buildSunoPrompt(job)}\n\nInstrumental only, no vocals.`;
+    log(`Prompt length: ${lyriaPrompt.length} chars`);
 
-    const initialClips = await generateMusic({
-      prompt: sunoPrompt,
-      style: sunoStyle,
-      title: job.title,
-      apiKey: sunoKey,
+    emit("step", { step: 1, status: "running", progress: 20, message: "Generating 2 variations..." });
+    log("Generating 2 song variations (this may take a few minutes)...");
+
+    const variations: LyriaResult[] = await generateTwoVariations({
+      prompt: lyriaPrompt,
+      apiKey: geminiKey,
     });
 
-    log(`${initialClips.length} clips queued — IDs: ${initialClips.map((c) => c.id.slice(0, 8)).join(", ")}`, "success");
-    log("Polling for completion (up to 6 minutes)...");
+    log(`${variations.length} variations generated`, "success");
 
-    const completedClips = await pollClips(initialClips, sunoKey, (attempt, statuses) => {
-      const progress = Math.min(88, attempt * 3);
-      const statusStr = statuses.join(" / ");
-      emit("step", { step: 1, status: "running", progress, message: `[${attempt * 10}s] ${statusStr}` });
-      log(`[${attempt * 10}s] ${statusStr}`);
-    });
+    // Save both variations to temp files for preview
+    const variationPaths: string[] = [];
+    for (let i = 0; i < variations.length; i++) {
+      const varPath = path.join(outputDir, `variation_${i + 1}.mp3`);
+      await saveLyriaAudio(variations[i], varPath);
+      variationPaths.push(varPath);
+      const stat = await fs.stat(varPath);
+      log(`Variation ${i + 1}: ${(stat.size / 1024 / 1024).toFixed(1)} MB`, "success");
+    }
 
-    log(`Both clips ready — ${completedClips.map((c) => c.id.slice(0, 8)).join(", ")}`, "success");
     emit("step", { step: 1, status: "done", progress: 100, message: "2 variations ready — awaiting selection" });
 
     // ── PAUSE: Song Selection ──────────────────────────────────────────────
     const selectionPayload = {
-      clips: completedClips.map((c) => ({
-        id: c.id,
-        streamUrl: c.stream_url,
-        audioUrl: c.audio_url,
-        title: c.title,
-        duration: c.duration,
+      clips: variations.map((v, i) => ({
+        id: `lyria-${job.id}-v${i + 1}`,
+        audioUrl: `/api/jobs/${job.id}/download?file=variation_${i + 1}&inline=1`,
+        title: `Variation ${i + 1}`,
+        duration: undefined,
       })),
     };
 
@@ -118,16 +113,15 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     log("Waiting for song selection...");
 
     const songAction = (await waitForAction(job.id)) as { clipIndex: number };
-    const selectedClip: SunoClip = completedClips[songAction.clipIndex] ?? completedClips[0];
+    const selectedIdx = songAction.clipIndex ?? 0;
+    const selectedVariation = variations[selectedIdx] ?? variations[0];
 
-    log(`Selected: Variation ${songAction.clipIndex + 1} (${selectedClip.id.slice(0, 8)})`, "success");
+    log(`Selected: Variation ${selectedIdx + 1}`, "success");
 
-    const audioUrl = selectedClip.audio_url || selectedClip.stream_url;
-    if (!audioUrl) throw new Error("Selected clip has no downloadable audio URL");
-
-    await downloadAudio(audioUrl, audioPath);
+    // Copy selected variation as the final song
+    await saveLyriaAudio(selectedVariation, audioPath);
     const audioStat = await fs.stat(audioPath);
-    log(`Audio downloaded: ${(audioStat.size / 1024 / 1024).toFixed(1)} MB`, "success");
+    log(`Audio saved: ${(audioStat.size / 1024 / 1024).toFixed(1)} MB`, "success");
 
     // Save song asset
     await createAsset({
@@ -138,9 +132,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
       filePath: audioPath,
       fileName: "song.mp3",
       fileSize: audioStat.size,
-      duration: selectedClip.duration,
       jobId: job.id,
-      sunoClipId: selectedClip.id,
     });
 
     // ── STEP 2: Gemini Thumbnail Generation ───────────────────────────────

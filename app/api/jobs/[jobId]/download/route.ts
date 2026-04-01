@@ -15,8 +15,9 @@ export async function GET(
   }
 
   const file = request.nextUrl.searchParams.get("file");
-  if (!file || !["video", "thumbnail", "thumbnail_raw", "metadata", "audio"].includes(file)) {
-    return NextResponse.json({ error: "Invalid file type. Use: video, thumbnail, thumbnail_raw, metadata, audio" }, { status: 400 });
+  const validFiles = ["video", "thumbnail", "thumbnail_raw", "metadata", "audio", "variation_1", "variation_2"];
+  if (!file || !validFiles.includes(file)) {
+    return NextResponse.json({ error: `Invalid file type. Use: ${validFiles.join(", ")}` }, { status: 400 });
   }
 
   const inline = request.nextUrl.searchParams.get("inline") === "1";
@@ -55,6 +56,16 @@ export async function GET(
       filePath = path.join(outputDir, "song.mp3");
       contentType = "audio/mpeg";
       fileName = `${safeName}_song.mp3`;
+      break;
+    case "variation_1":
+      filePath = path.join(outputDir, "variation_1.mp3");
+      contentType = "audio/mpeg";
+      fileName = `${safeName}_variation_1.mp3`;
+      break;
+    case "variation_2":
+      filePath = path.join(outputDir, "variation_2.mp3");
+      contentType = "audio/mpeg";
+      fileName = `${safeName}_variation_2.mp3`;
       break;
     default:
       return NextResponse.json({ error: "Invalid file type" }, { status: 400 });

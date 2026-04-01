@@ -533,7 +533,7 @@ export default function StudioPage() {
                     <h2 className="mt-2 font-display text-3xl text-paper">Choose The Sonic Frame</h2>
                   </div>
                   <p className="max-w-md font-body text-sm leading-6 text-dust">
-                    The style presets define the era cues, mood defaults, and the production vocabulary sent to Suno.
+                    The style presets define the era cues, mood defaults, and the production vocabulary sent to Lyria 3.
                   </p>
                 </div>
 
@@ -683,7 +683,7 @@ export default function StudioPage() {
           <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
             <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">What Happens Next</p>
             <div className="mt-4 space-y-4 font-body text-sm leading-7 text-ash">
-              <p>1. Suno generates two candidate instrumentals from your brief.</p>
+              <p>1. Lyria 3 generates two candidate instrumentals from your brief.</p>
               <p>2. You choose the winning take and review the thumbnail concept.</p>
               <p>3. The system composites branding, renders video, and writes metadata.</p>
             </div>

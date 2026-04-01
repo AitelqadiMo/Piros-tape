@@ -3,11 +3,8 @@
 import { useState } from "react";
 
 export default function SettingsPage() {
-  const [sunoKey, setSunoKey] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
-  const [showSuno, setShowSuno] = useState(false);
   const [showGemini, setShowGemini] = useState(false);
-  const [sunoStatus, setSunoStatus] = useState<"idle" | "testing" | "valid" | "invalid">("idle");
   const [geminiStatus, setGeminiStatus] = useState<"idle" | "testing" | "valid" | "invalid">("idle");
 
   // Pipeline defaults
@@ -15,21 +12,6 @@ export default function SettingsPage() {
   const [crf, setCrf] = useState(18);
   const [audioBitrate, setAudioBitrate] = useState("320k");
   const [ffmpegPath, setFfmpegPath] = useState("/usr/bin/ffmpeg");
-
-  const testSunoKey = async () => {
-    setSunoStatus("testing");
-    try {
-      const resp = await fetch("/api/test-suno", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: sunoKey }),
-      });
-      const data = await resp.json();
-      setSunoStatus(data.valid ? "valid" : "invalid");
-    } catch {
-      setSunoStatus("invalid");
-    }
-  };
 
   const testGeminiKey = async () => {
     setGeminiStatus("testing");
@@ -49,9 +31,9 @@ export default function SettingsPage() {
   const statusIcon = (status: string) => {
     switch (status) {
       case "valid":
-        return <span className="text-tape">✓ Valid</span>;
+        return <span className="text-tape">&#10003; Valid</span>;
       case "invalid":
-        return <span className="text-crimson">✗ Invalid</span>;
+        return <span className="text-crimson">&#10007; Invalid</span>;
       case "testing":
         return <span className="text-dust animate-pulse-opacity">Testing...</span>;
       default:
@@ -68,46 +50,18 @@ export default function SettingsPage() {
       {/* API Keys */}
       <section className="animate-fade-in animate-delay-1">
         <h2 className="font-mono text-[11px] uppercase tracking-wider text-dust mb-4">
-          API Keys
+          API Key
         </h2>
         <div className="h-[1px] bg-noir-3 mb-4" />
 
         <div className="space-y-6">
           <div>
             <label className="font-mono text-[11px] uppercase tracking-wider text-dust block mb-2">
-              Suno API Key
-            </label>
-            <div className="flex gap-2">
-              <input
-                type={showSuno ? "text" : "password"}
-                value={sunoKey}
-                onChange={(e) => setSunoKey(e.target.value)}
-                placeholder="Enter Suno API key"
-                className="flex-1"
-              />
-              <button
-                onClick={() => setShowSuno(!showSuno)}
-                className="btn-secondary text-[10px] px-3"
-              >
-                {showSuno ? "Hide" : "Show"}
-              </button>
-              <button
-                onClick={testSunoKey}
-                disabled={!sunoKey || sunoStatus === "testing"}
-                className="btn-secondary text-[10px] px-3"
-              >
-                Test
-              </button>
-            </div>
-            <div className="font-mono text-[11px] mt-1">
-              {statusIcon(sunoStatus)}
-            </div>
-          </div>
-
-          <div>
-            <label className="font-mono text-[11px] uppercase tracking-wider text-dust block mb-2">
               Gemini API Key
             </label>
+            <p className="font-body text-xs text-dust mb-3">
+              Powers all features: Lyria 3 Pro (music), Gemini (thumbnails, metadata, research).
+            </p>
             <div className="flex gap-2">
               <input
                 type={showGemini ? "text" : "password"}
@@ -136,9 +90,19 @@ export default function SettingsPage() {
           </div>
 
           <p className="font-body text-sm text-dust">
-            API keys are read from <code className="font-mono text-xs text-ash">.env.local</code> at
-            server startup. Edit the file directly and restart the server to update keys.
+            The API key is read from <code className="font-mono text-xs text-ash">GEMINI_API_KEY</code> in{" "}
+            <code className="font-mono text-xs text-ash">.env.local</code> at server startup.
+            Edit the file directly and restart the server to update.
           </p>
+
+          <div className="p-4 border border-tape/15 rounded bg-noir-3">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-tape mb-2">Powered by Google Gemini</p>
+            <div className="space-y-1 font-mono text-xs text-dust">
+              <p>Music generation: <span className="text-ash">Lyria 3 Pro</span> (lyria-3-pro-preview)</p>
+              <p>Thumbnails: <span className="text-ash">Gemini 3.1 Flash</span> (gemini-3.1-flash-image-preview)</p>
+              <p>Text/metadata: <span className="text-ash">Gemini 2.5 Flash</span> (gemini-2.5-flash)</p>
+            </div>
+          </div>
         </div>
       </section>
 

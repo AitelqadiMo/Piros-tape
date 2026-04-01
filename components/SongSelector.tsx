@@ -53,7 +53,7 @@ export default function SongSelector({ clips, onSelect, disabled }: SongSelector
         </h3>
       </div>
       <p className="font-body text-sm text-dust">
-        Suno generated two variations. Listen to both and select the one to use.
+        Lyria 3 generated two variations. Listen to both and select the one to use.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

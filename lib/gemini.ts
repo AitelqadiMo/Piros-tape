@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -11,31 +11,27 @@ export async function generateThumbnail(
   apiKey: string,
   outputPath: string
 ): Promise<void> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: IMAGE_MODEL });
+  const ai = new GoogleGenAI({ apiKey });
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
-    generationConfig: {
+  const response = await ai.models.generateContent({
+    model: IMAGE_MODEL,
+    contents: imagePrompt,
+    config: {
       responseModalities: ["IMAGE"],
-    } as unknown as undefined,
+    },
   });
 
-  const response = result.response;
   const candidates = response.candidates;
   if (!candidates || candidates.length === 0) {
     throw new Error("Gemini returned no candidates");
   }
 
-  const parts = candidates[0].content.parts;
+  const parts = candidates[0].content?.parts || [];
   for (const part of parts) {
-    const inlineData = (
-      part as { inlineData?: { mimeType: string; data: string } }
-    ).inlineData;
-    if (inlineData && inlineData.mimeType.startsWith("image/")) {
+    if (part.inlineData && part.inlineData.mimeType?.startsWith("image/")) {
       const dir = path.dirname(outputPath);
       await fs.mkdir(dir, { recursive: true });
-      const buffer = Buffer.from(inlineData.data, "base64");
+      const buffer = Buffer.from(part.inlineData.data!, "base64");
       await fs.writeFile(outputPath, buffer);
       return;
     }
@@ -48,10 +44,12 @@ export async function generateSceneDescription(
   prompt: string,
   apiKey: string
 ): Promise<string> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: TEXT_MODEL });
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  const ai = new GoogleGenAI({ apiKey });
+  const response = await ai.models.generateContent({
+    model: TEXT_MODEL,
+    contents: prompt,
+  });
+  return response.text || "";
 }
 
 export async function researchSongs(
@@ -59,13 +57,15 @@ export async function researchSongs(
   systemPrompt: string,
   apiKey: string
 ): Promise<string> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
+  const ai = new GoogleGenAI({ apiKey });
+  const response = await ai.models.generateContent({
     model: TEXT_MODEL,
-    systemInstruction: systemPrompt,
+    contents: query,
+    config: {
+      systemInstruction: systemPrompt,
+    },
   });
-  const result = await model.generateContent(query);
-  return result.response.text();
+  return response.text || "";
 }
 
 export async function fetchLyrics(
@@ -73,11 +73,13 @@ export async function fetchLyrics(
   title: string,
   apiKey: string
 ): Promise<{ lyrics: string | null; found: boolean }> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: TEXT_MODEL });
+  const ai = new GoogleGenAI({ apiKey });
   const prompt = `Find the complete lyrics for the song "${title}" by ${artist}. Return ONLY the lyrics text, no commentary, no translations, no headings. If you cannot find the lyrics or are not confident they are accurate, respond with exactly the word: NOT_FOUND`;
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
+  const response = await ai.models.generateContent({
+    model: TEXT_MODEL,
+    contents: prompt,
+  });
+  const text = (response.text || "").trim();
   if (text === "NOT_FOUND" || text.length < 50) {
     return { lyrics: null, found: false };
   }
@@ -89,10 +91,12 @@ export async function fetchLyrics(
  */
 export async function testGeminiKey(apiKey: string): Promise<boolean> {
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: TEXT_MODEL });
-    const result = await model.generateContent("Say ok");
-    return !!result.response.text();
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: "Say ok",
+    });
+    return !!(response.text);
   } catch {
     return false;
   }

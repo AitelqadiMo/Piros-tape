@@ -104,7 +104,7 @@ export const STYLE_OPTIONS: StyleOption[] = [
 ];
 
 export const PIPELINE_STEPS = [
-  { number: 1, name: "SUNO GENERATION" },
+  { number: 1, name: "LYRIA 3 GENERATION" },
   { number: 2, name: "THUMBNAIL — GEMINI" },
   { number: 3, name: "BRANDING COMPOSITE" },
   { number: 4, name: "VIDEO ASSEMBLY" },

@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { STYLE_OPTIONS, StyleName } from "@/lib/types";
-import { buildSunoStyle } from "@/lib/prompts";
 
 interface GeneratedClip {
   id: string;
@@ -46,17 +45,13 @@ export default function MusicPage() {
 
     const prompt = useCustom
       ? customPrompt
-      : `Instruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs, analog tape noise.\nTempo: ${bpm} BPM, laid-back swing.\nProduction: analog tape compression, mono reverb plate, low-shelf warmth, mild saturation; no digital synths or trap.`;
-
-    const styleStr = useCustom
-      ? customPrompt.slice(0, 50)
-      : buildSunoStyle({ style, decade, bpm } as Parameters<typeof buildSunoStyle>[0]);
+      : `${decade}s Hungarian vintage ${style.toLowerCase()}, ${bpm} BPM, laid-back swing.\n\nInstruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs, analog tape noise.\nTempo: ${bpm} BPM, laid-back swing.\nProduction: analog tape compression, mono reverb plate, low-shelf warmth, mild saturation; no digital synths or trap.\nInstrumental only, no vocals.`;
 
     try {
       const resp = await fetch("/api/music/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, style: styleStr, title, artists }),
+        body: JSON.stringify({ prompt, title, artists }),
         signal: controller.signal,
       });
 
@@ -122,7 +117,7 @@ export default function MusicPage() {
       <div className="mb-8">
         <h1 className="font-display italic text-3xl text-paper mb-2">Music Generation</h1>
         <p className="font-mono text-xs text-dust tracking-wide uppercase">
-          Standalone Suno AI music generation — create tracks independently
+          Standalone Lyria 3 Pro music generation — create tracks independently
         </p>
       </div>
 
@@ -221,7 +216,7 @@ export default function MusicPage() {
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 rows={6}
-                placeholder="Enter your custom Suno prompt..."
+                placeholder="Enter your custom Lyria 3 prompt..."
                 className="w-full mt-3"
               />
             )}

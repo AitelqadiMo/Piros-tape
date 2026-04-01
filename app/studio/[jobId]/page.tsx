@@ -36,7 +36,7 @@ type AwaitingState =
   | { type: "video_review"; videoUrl: string; thumbnailUrl: string };
 
 const STEP_HINTS = [
-  "Sending the music brief to Suno and waiting for two takes.",
+  "Sending the music brief to Lyria 3 Pro and generating two takes.",
   "Generating thumbnail concepts with Gemini.",
   "Applying PIROS TAPE branding and final composition.",
   "Rendering the final video with FFmpeg.",
