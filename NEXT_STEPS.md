@@ -143,13 +143,6 @@ Go to: http://localhost:3000/jobs
 → All metadata and timing preserved
 ```
 
-### API Keys
-```
-✅ Gemini: AIzaSyBZA0p1CfT-xxDaZXg8HYJpmyQew5Mga58
-✅ Suno: 632ef7d696eb8cc14d5e8ba02e9bbf8b
-✅ Both tested and working
-```
-
 ---
 
 ## 💡 Key Insight
