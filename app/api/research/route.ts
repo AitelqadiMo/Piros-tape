@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { researchSongs } from "@/lib/gemini";
 import { RESEARCH_SYSTEM_PROMPT } from "@/lib/prompts";
+import { readResearchSuggestions, saveResearchSuggestions } from "@/lib/research-history";
+
+export async function GET() {
+  try {
+    const suggestions = await readResearchSuggestions();
+    return NextResponse.json({ suggestions });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,8 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     const candidates = JSON.parse(jsonStr);
+    const suggestions = await saveResearchSuggestions(query, candidates);
 
-    return NextResponse.json({ candidates });
+    return NextResponse.json({ candidates, suggestions });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });

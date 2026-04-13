@@ -4,9 +4,9 @@ import { Job } from "./types";
 import { updateJob } from "./jobs";
 import { createAsset } from "./assets";
 import {
-  buildSunoPrompt,
-  buildSunoStyle,
+  buildLyriaPrompt,
   buildImagePrompt,
+  buildSunoStyle,
   buildYouTubeTitle,
   buildYouTubeDescription,
   buildScenePrompt,
@@ -15,6 +15,7 @@ import { generateTwoVariations, saveLyriaAudio, LyriaResult } from "./lyria";
 import { generateThumbnail, generateSceneDescription } from "./gemini";
 import { compositeThumbnail } from "./branding";
 import { assembleVideo } from "./ffmpeg";
+import { downloadAudio, generateMusic, pollClips } from "./suno";
 import { waitForAction } from "./actions";
 
 type EmitFn = (event: string, data: unknown) => void;
@@ -32,9 +33,15 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
   console.log(`[Pipeline.runPipeline] Starting for job ${job.id}`);
 
   const geminiKey = process.env.GEMINI_API_KEY;
+  const sunoKey = process.env.SUNO_API_KEY;
+  const engine = job.generationEngine || "lyria";
 
   if (!geminiKey || geminiKey === "your_gemini_key_here") {
     throw new Error("GEMINI_API_KEY not configured");
+  }
+
+  if (engine === "suno" && (!sunoKey || sunoKey === "your_suno_key_here")) {
+    throw new Error("SUNO_API_KEY not configured");
   }
 
   const outputDir = getOutputDir(job.id);
@@ -51,6 +58,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
   await updateJob(job.id, {
     status: "running",
+    errorMessage: undefined,
     outputDir,
     currentStep: 1,
     stepStatuses: sixPending,
@@ -64,38 +72,84 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
   try {
     // ── STEP 1: Lyria 3 Music Generation ─────────────────────────────────
-    emit("step", { step: 1, status: "running", progress: 0, message: "Generating with Lyria 3 Pro..." });
-    log("Submitting to Lyria 3 Pro (Google Gemini)...");
-
-    const lyriaPrompt = `${buildSunoStyle(job)}\n\n${buildSunoPrompt(job)}\n\nInstrumental only, no vocals.`;
-    log(`Prompt length: ${lyriaPrompt.length} chars`);
-
-    emit("step", { step: 1, status: "running", progress: 20, message: "Generating 2 variations..." });
-    log("Generating 2 song variations (this may take a few minutes)...");
-
-    const variations: LyriaResult[] = await generateTwoVariations({
-      prompt: lyriaPrompt,
-      apiKey: geminiKey,
-    });
-
-    log(`${variations.length} variations generated`, "success");
-
-    // Save both variations to temp files for preview
     const variationPaths: string[] = [];
-    for (let i = 0; i < variations.length; i++) {
-      const varPath = path.join(outputDir, `variation_${i + 1}.mp3`);
-      await saveLyriaAudio(variations[i], varPath);
-      variationPaths.push(varPath);
-      const stat = await fs.stat(varPath);
-      log(`Variation ${i + 1}: ${(stat.size / 1024 / 1024).toFixed(1)} MB`, "success");
+
+    if (engine === "suno") {
+      emit("step", { step: 1, status: "running", progress: 0, message: "Generating with Suno..." });
+      log("Submitting to Suno V4.5...");
+
+      const sunoPrompt = buildLyriaPrompt(job);
+      const sunoStyle = buildSunoStyle(job);
+      log(`Prompt length: ${sunoPrompt.length} chars`);
+
+      emit("step", { step: 1, status: "running", progress: 20, message: "Generating 2 Suno variations..." });
+      const initialClips = await generateMusic({
+        prompt: sunoPrompt,
+        style: sunoStyle,
+        title: job.title,
+        apiKey: sunoKey!,
+        instrumental: false,
+      });
+
+      const clips = await pollClips(initialClips, sunoKey!, (attempt, statuses) => {
+        emit("step", {
+          step: 1,
+          status: "running",
+          progress: Math.min(85, 20 + attempt * 2),
+          message: `Polling Suno clips: ${statuses.join(", ")}`,
+        });
+      });
+
+      log(`${clips.length} Suno variations generated`, "success");
+
+      for (let i = 0; i < clips.length; i++) {
+        const varPath = path.join(outputDir, `variation_${i + 1}.mp3`);
+        const audioUrl = clips[i].audio_url || clips[i].stream_url;
+        if (!audioUrl) {
+          throw new Error(`Suno clip ${i + 1} did not include an audio URL`);
+        }
+        await downloadAudio(audioUrl, varPath);
+        variationPaths.push(varPath);
+        const stat = await fs.stat(varPath);
+        log(`Variation ${i + 1}: ${(stat.size / 1024 / 1024).toFixed(1)} MB`, "success");
+      }
+    } else {
+      emit("step", { step: 1, status: "running", progress: 0, message: "Generating with Lyria 3 Pro..." });
+      log("Submitting to Lyria 3 Pro (Google Gemini)...");
+
+      const lyriaPrompt = buildLyriaPrompt(job);
+      log(job.lyrics?.trim() ? "Derived a safe vocal brief from source lyrics for Lyria." : "No source lyrics found; asking Lyria to generate vocals from the brief.");
+      log(`Prompt length: ${lyriaPrompt.length} chars`);
+
+      emit("step", { step: 1, status: "running", progress: 20, message: "Generating 2 variations..." });
+      log("Generating 2 song variations (this may take a few minutes)...");
+
+      const variations: LyriaResult[] = await generateTwoVariations({
+        prompt: lyriaPrompt,
+        apiKey: geminiKey,
+      });
+
+      log(`${variations.length} variations generated`, "success");
+
+      for (let i = 0; i < variations.length; i++) {
+        const varPath = path.join(outputDir, `variation_${i + 1}.mp3`);
+        await saveLyriaAudio(variations[i], varPath);
+        variationPaths.push(varPath);
+        const stat = await fs.stat(varPath);
+        log(`Variation ${i + 1}: ${(stat.size / 1024 / 1024).toFixed(1)} MB`, "success");
+      }
+    }
+
+    if (variationPaths.length === 0) {
+      throw new Error(`No ${engine} variations were saved for review`);
     }
 
     emit("step", { step: 1, status: "done", progress: 100, message: "2 variations ready — awaiting selection" });
 
     // ── PAUSE: Song Selection ──────────────────────────────────────────────
     const selectionPayload = {
-      clips: variations.map((v, i) => ({
-        id: `lyria-${job.id}-v${i + 1}`,
+      clips: variationPaths.map((_path, i) => ({
+        id: `${engine}-${job.id}-v${i + 1}`,
         audioUrl: `/api/jobs/${job.id}/download?file=variation_${i + 1}&inline=1`,
         title: `Variation ${i + 1}`,
         duration: undefined,
@@ -112,14 +166,14 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     emit("awaiting_input", { type: "song_selection", payload: selectionPayload });
     log("Waiting for song selection...");
 
-    const songAction = (await waitForAction(job.id)) as { clipIndex: number };
+    const songAction = (await waitForAction(job.id, "song_selection")) as { clipIndex: number };
     const selectedIdx = songAction.clipIndex ?? 0;
-    const selectedVariation = variations[selectedIdx] ?? variations[0];
+    const selectedPath = variationPaths[selectedIdx] ?? variationPaths[0];
 
     log(`Selected: Variation ${selectedIdx + 1}`, "success");
 
     // Copy selected variation as the final song
-    await saveLyriaAudio(selectedVariation, audioPath);
+    await fs.copyFile(selectedPath, audioPath);
     const audioStat = await fs.stat(audioPath);
     log(`Audio saved: ${(audioStat.size / 1024 / 1024).toFixed(1)} MB`, "success");
 
@@ -159,7 +213,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
       // ── PAUSE: Thumbnail Review ──────────────────────────────────────────
       const thumbPayload = {
-        thumbnailUrl: `/api/jobs/${job.id}/download?file=thumbnail_raw`,
+        thumbnailUrl: `/api/jobs/${job.id}/download?file=thumbnail_raw&inline=1`,
       };
 
       await updateJob(job.id, {
@@ -171,7 +225,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
       emit("awaiting_input", { type: "thumbnail_review", payload: thumbPayload });
       log("Waiting for thumbnail review...");
 
-      const thumbAction = (await waitForAction(job.id)) as { action: "accept" | "regenerate" };
+      const thumbAction = (await waitForAction(job.id, "thumbnail_review")) as { action: "accept" | "regenerate" };
 
       if (thumbAction.action === "accept") {
         thumbnailAccepted = true;
@@ -245,8 +299,8 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     emit("step", { step: 5, status: "running", progress: 0, message: "Awaiting video review..." });
 
     const videoPayload = {
-      videoUrl: `/api/jobs/${job.id}/download?file=video`,
-      thumbnailUrl: `/api/jobs/${job.id}/download?file=thumbnail`,
+      videoUrl: `/api/jobs/${job.id}/download?file=video&inline=1`,
+      thumbnailUrl: `/api/jobs/${job.id}/download?file=thumbnail&inline=1`,
     };
 
     await updateJob(job.id, {
@@ -260,7 +314,7 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
 
     let videoAccepted = false;
     while (!videoAccepted) {
-      const videoAction = (await waitForAction(job.id)) as {
+      const videoAction = (await waitForAction(job.id, "video_review")) as {
         action: "accept" | "re_render";
         crf?: number;
         audioBitrate?: string;
@@ -357,8 +411,19 @@ export async function runPipeline(job: Job, emit: EmitFn): Promise<void> {
     log("Production complete!", "success");
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const updated = await updateJob(job.id, { status: "error", waitingFor: null });
-    const step = updated?.currentStep ?? 1;
+    const latest = await updateJob(job.id, { waitingFor: null });
+    const step = latest?.currentStep ?? 1;
+    const stepStatuses = [...(latest?.stepStatuses ?? ["pending", "pending", "pending", "pending", "pending", "pending"])];
+    stepStatuses[Math.max(0, step - 1)] = "error";
+
+    await updateJob(job.id, {
+      status: "error",
+      waitingFor: null,
+      errorMessage: message,
+      stepStatuses: stepStatuses as Job["stepStatuses"],
+    });
+
+    emit("step", { step, status: "error", progress: 100, message });
     log(`Error at step ${step}: ${message}`, "error");
     emit("pipeline_error", { step, message });
   }

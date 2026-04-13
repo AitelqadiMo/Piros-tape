@@ -12,7 +12,7 @@ export interface LyriaResult {
 }
 
 /**
- * Generate a full-length instrumental song using Lyria 3 Pro.
+ * Generate a full-length song using Lyria 3 Pro.
  * Returns the audio buffer and any generated lyrics/structure text.
  */
 export async function generateSong(params: {
@@ -33,7 +33,12 @@ export async function generateSong(params: {
 
   const candidates = response.candidates;
   if (!candidates || candidates.length === 0) {
-    throw new Error("Lyria 3 returned no candidates");
+    const blockReason = response.promptFeedback?.blockReason;
+    throw new Error(
+      typeof blockReason === "string" && blockReason.length > 0
+        ? `Lyria 3 returned no candidates (${blockReason})`
+        : "Lyria 3 returned no candidates"
+    );
   }
 
   let audioData: Buffer | null = null;

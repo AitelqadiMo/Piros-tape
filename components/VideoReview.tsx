@@ -15,6 +15,11 @@ export default function VideoReview({ videoUrl, thumbnailUrl, onAccept, onReRend
   const [audioBitrate, setAudioBitrate] = useState("320k");
   const [loading, setLoading] = useState(false);
 
+  const withInline = (url?: string) => {
+    if (!url) return undefined;
+    return `${url}${url.includes("?") ? "&" : "?"}inline=1`;
+  };
+
   const handleReRender = () => {
     setLoading(true);
     onReRender({ crf, audioBitrate });
@@ -26,8 +31,8 @@ export default function VideoReview({ videoUrl, thumbnailUrl, onAccept, onReRend
         <video
           controls
           className="w-full aspect-video"
-          src={`${videoUrl}&inline=1&t=${Date.now()}`}
-          poster={thumbnailUrl ? `${thumbnailUrl}&inline=1` : undefined}
+          src={withInline(videoUrl)}
+          poster={withInline(thumbnailUrl)}
         />
       </div>
 

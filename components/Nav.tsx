@@ -18,8 +18,8 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-full">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <nav className="sticky top-0 z-40 w-full border-b border-crimson/20 bg-[rgba(10,6,4,0.82)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="group relative">
           <span className="font-display italic text-2xl text-crimson">
             PIROS TAPE
@@ -32,7 +32,7 @@ export default function Nav() {
           />
         </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 justify-end">
           {navLinks.map((link) => {
             const isActive =
               link.href === "/"
@@ -43,8 +43,8 @@ export default function Nav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`font-mono text-xs uppercase tracking-[0.1em] transition-colors ${
-                  isActive ? "text-paper" : "text-dust hover:text-ash"
+                className={`rounded-full px-3 py-1 font-mono text-xs uppercase tracking-[0.1em] transition-colors ${
+                  isActive ? "bg-[rgba(212,168,83,0.1)] text-paper" : "text-dust hover:text-ash"
                 }`}
               >
                 {link.label}
@@ -53,7 +53,6 @@ export default function Nav() {
           })}
         </div>
       </div>
-      <div className="h-[1px] bg-crimson" />
     </nav>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import StyleCard from "@/components/StyleCard";
 import { STYLE_OPTIONS, StyleName } from "@/lib/types";
 
 interface GeneratedClip {
@@ -9,7 +11,6 @@ interface GeneratedClip {
   artists: string;
   assetId?: string;
   duration?: number;
-  filePath?: string;
 }
 
 type Phase = "configure" | "generating" | "done";
@@ -29,9 +30,23 @@ export default function MusicPage() {
   const [clips, setClips] = useState<GeneratedClip[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const abortRef = useRef<AbortController | null>(null);
+  const selectedStyle = useMemo(
+    () => STYLE_OPTIONS.find((option) => option.name === style) ?? STYLE_OPTIONS[0],
+    [style]
+  );
 
-  const selectedStyle = STYLE_OPTIONS.find((s) => s.name === style);
+  const generatedPrompt = useMemo(() => {
+    if (useCustom) return customPrompt;
+
+    return `${decade}s Hungarian vintage ${style.toLowerCase()}, ${bpm} BPM, laid-back swing.
+
+Instruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs, analog tape noise.
+Tempo: ${bpm} BPM, laid-back swing.
+Production: analog tape compression, mono reverb plate, low-shelf warmth, mild saturation; no digital synths or trap.
+Instrumental only, no vocals.`;
+  }, [bpm, customPrompt, decade, style, useCustom]);
+
+  const canGenerate = title.trim() && artists.trim() && (!useCustom || customPrompt.trim());
 
   const generate = async () => {
     setPhase("generating");
@@ -40,26 +55,18 @@ export default function MusicPage() {
     setClips([]);
     setError(null);
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    const prompt = useCustom
-      ? customPrompt
-      : `${decade}s Hungarian vintage ${style.toLowerCase()}, ${bpm} BPM, laid-back swing.\n\nInstruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs, analog tape noise.\nTempo: ${bpm} BPM, laid-back swing.\nProduction: analog tape compression, mono reverb plate, low-shelf warmth, mild saturation; no digital synths or trap.\nInstrumental only, no vocals.`;
-
     try {
-      const resp = await fetch("/api/music/generate", {
+      const response = await fetch("/api/music/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, title, artists }),
-        signal: controller.signal,
+        body: JSON.stringify({ prompt: generatedPrompt, title, artists }),
       });
 
-      if (!resp.ok || !resp.body) {
-        throw new Error(`Request failed: ${resp.status}`);
+      if (!response.ok || !response.body) {
+        throw new Error(`Request failed: ${response.status}`);
       }
 
-      const reader = resp.body.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
@@ -79,17 +86,18 @@ export default function MusicPage() {
             try {
               const data = JSON.parse(line.slice(6));
               if (eventType === "log") {
-                setLogs((prev) => [...prev, data.message]);
+                setLogs((previous) => [...previous, data.message]);
               } else if (eventType === "progress") {
                 setProgress(data.percent || 0);
               } else if (eventType === "complete") {
                 setClips(
-                  (data.assets || []).map((a: Record<string, unknown>) => ({
-                    id: a.id,
-                    title: a.title,
-                    artists: a.artists,
-                    assetId: a.id,
-                    duration: a.duration,
+                  (data.assets || []).map((asset: Record<string, unknown>) => ({
+                    id: String(asset.id),
+                    title: String(asset.title),
+                    artists: String(asset.artists),
+                    assetId: String(asset.id),
+                    duration:
+                      typeof asset.duration === "number" ? asset.duration : undefined,
                   }))
                 );
                 setPhase("done");
@@ -98,197 +106,313 @@ export default function MusicPage() {
                 setPhase("configure");
               }
             } catch {
-              // skip malformed JSON
+              // Ignore malformed event payloads.
             }
+
             eventType = "";
           }
         }
       }
     } catch (err) {
-      if ((err as Error).name !== "AbortError") {
-        setError(err instanceof Error ? err.message : String(err));
-        setPhase("configure");
-      }
+      setError(err instanceof Error ? err.message : String(err));
+      setPhase("configure");
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      <div className="mb-8">
-        <h1 className="font-display italic text-3xl text-paper mb-2">Music Generation</h1>
-        <p className="font-mono text-xs text-dust tracking-wide uppercase">
-          Standalone Lyria 3 Pro music generation — create tracks independently
-        </p>
-      </div>
+    <div className="space-y-8">
+      <section className="relative overflow-hidden rounded-[30px] border border-[rgba(212,168,83,0.16)] bg-[linear-gradient(135deg,rgba(160,28,18,0.24),rgba(18,12,8,0.98)_45%,rgba(212,168,83,0.08))] px-6 py-8 shadow-[0_30px_80px_rgba(0,0,0,0.28)]">
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(212,168,83,0.18),transparent_55%)] lg:block" />
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_360px]">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-tape">Standalone Music Tool</p>
+            <h1 className="mt-3 font-display text-4xl leading-none text-paper md:text-6xl">
+              Generate fresh variations without running the full pipeline.
+            </h1>
+            <p className="mt-4 max-w-2xl font-body text-lg leading-8 text-ash">
+              Use the PIROS TAPE style presets for a quick brief, or switch to a custom prompt when you want full control over the Lyria request.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+            <MetricCard label="Engine" value="Lyria 3" meta="Standalone generation" />
+            <MetricCard label="Style" value={selectedStyle.name} meta={selectedStyle.decade} />
+            <MetricCard label="Tempo" value={`${bpm} BPM`} meta={useCustom ? "Custom prompt enabled" : "Preset brief"} />
+          </div>
+        </div>
+      </section>
 
       {error && (
-        <div className="mb-6 p-4 border border-crimson/30 bg-crimson/5 rounded">
-          <p className="font-mono text-sm text-crimson">{error}</p>
+        <div className="rounded-[24px] border border-crimson/40 bg-[rgba(160,28,18,0.08)] px-5 py-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-crimson">Generation Error</p>
+          <p className="mt-2 font-body text-base text-ash">{error}</p>
         </div>
       )}
 
       {phase === "configure" && (
-        <div className="space-y-6 animate-fade-in">
-          {/* Track details */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="font-mono text-xs text-dust uppercase tracking-wider block mb-2">Title</label>
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="SONG TITLE"
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label className="font-mono text-xs text-dust uppercase tracking-wider block mb-2">Artists</label>
-              <input
-                value={artists}
-                onChange={(e) => setArtists(e.target.value)}
-                placeholder="Artist 1 × Artist 2"
-                className="w-full"
-              />
-            </div>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+          <div className="space-y-6">
+            <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+              <div className="mb-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">Track Details</p>
+                <h2 className="mt-2 font-display text-3xl text-paper">Name The Session</h2>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-dust">
+                    Title
+                  </label>
+                  <input
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder="SONG TITLE"
+                    className="w-full rounded-[18px] border border-[rgba(212,168,83,0.15)] bg-noir-3/80 px-4 py-3"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-dust">
+                    Artists
+                  </label>
+                  <input
+                    value={artists}
+                    onChange={(event) => setArtists(event.target.value)}
+                    placeholder="Artist 1 × Artist 2"
+                    className="w-full rounded-[18px] border border-[rgba(212,168,83,0.15)] bg-noir-3/80 px-4 py-3"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+              <div className="mb-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">Style Direction</p>
+                <h2 className="mt-2 font-display text-3xl text-paper">Choose The Sonic Frame</h2>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                {STYLE_OPTIONS.map((option) => (
+                  <StyleCard
+                    key={option.name}
+                    style={option}
+                    selected={style === option.name}
+                    onClick={() => {
+                      setStyle(option.name);
+                      setDecade(option.decade.replace("s", ""));
+                      setBpm(option.defaultBpm);
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+              <div className="mb-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">Prompt Controls</p>
+                <h2 className="mt-2 font-display text-3xl text-paper">Shape The Lyria Brief</h2>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px]">
+                <div>
+                  <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-dust">
+                    BPM
+                  </label>
+                  <div className="rounded-[20px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 px-4 py-4">
+                    <div className="mb-2 flex items-center justify-between font-mono text-xs uppercase tracking-[0.16em] text-dust">
+                      <span>Tempo</span>
+                      <span>{bpm}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={70}
+                      max={120}
+                      value={bpm}
+                      onChange={(event) => setBpm(Number(event.target.value))}
+                      className="w-full accent-tape"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-dust">
+                    Decade
+                  </label>
+                  <select
+                    value={decade}
+                    onChange={(event) => setDecade(event.target.value)}
+                    className="w-full rounded-[18px] border border-[rgba(212,168,83,0.15)] bg-noir-3/80 px-4 py-3"
+                  >
+                    <option value="1960">1960s</option>
+                    <option value="1970">1970s</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useCustom}
+                    onChange={(event) => setUseCustom(event.target.checked)}
+                    className="accent-tape"
+                  />
+                  <span className="font-mono text-xs text-dust uppercase">Use custom prompt</span>
+                </label>
+              </div>
+
+              {useCustom && (
+                <textarea
+                  value={customPrompt}
+                  onChange={(event) => setCustomPrompt(event.target.value)}
+                  rows={7}
+                  placeholder="Enter your custom Lyria 3 prompt..."
+                  className="mt-4 min-h-[180px] w-full resize-none rounded-[20px] border border-[rgba(212,168,83,0.15)] bg-noir-3/80 px-4 py-4 font-mono text-sm leading-6"
+                />
+              )}
+            </section>
           </div>
 
-          {/* Style selection */}
-          <div>
-            <label className="font-mono text-xs text-dust uppercase tracking-wider block mb-3">Style</label>
-            <div className="grid grid-cols-3 gap-3">
-              {STYLE_OPTIONS.map((opt) => (
+          <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+            <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">Preview</p>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Title</p>
+                  <p className="mt-1 font-display text-2xl text-paper">{title || "Untitled session"}</p>
+                  <p className="mt-1 font-body text-sm text-ash">{artists || "Artist line will appear here."}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoPill label="Style" value={selectedStyle.name} />
+                  <InfoPill label="Decade" value={`${decade}s`} />
+                </div>
+
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Prompt</p>
+                  <pre className="mt-2 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-[20px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 p-4 font-mono text-xs leading-6 text-ash">
+                    {generatedPrompt || "Your prompt preview will appear here."}
+                  </pre>
+                </div>
+
                 <button
-                  key={opt.name}
-                  onClick={() => {
-                    setStyle(opt.name);
-                    setDecade(opt.decade.replace("s", ""));
-                    setBpm(opt.defaultBpm);
-                  }}
-                  className={`p-3 border rounded text-left transition-all ${
-                    style === opt.name
-                      ? "border-tape bg-tape/10 text-paper"
-                      : "border-dust/20 text-dust hover:border-dust/40"
-                  }`}
+                  onClick={generate}
+                  disabled={!canGenerate}
+                  className="btn-primary w-full"
                 >
-                  <div className="font-mono text-xs uppercase">{opt.name}</div>
-                  <div className="font-body text-xs mt-1 opacity-60">{opt.energy}</div>
+                  Generate Music
                 </button>
-              ))}
-            </div>
-          </div>
-
-          {/* BPM */}
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <label className="font-mono text-xs text-dust uppercase tracking-wider block mb-2">
-                BPM: {bpm}
-              </label>
-              <input
-                type="range"
-                min={70}
-                max={120}
-                value={bpm}
-                onChange={(e) => setBpm(Number(e.target.value))}
-                className="w-full accent-tape"
-              />
-            </div>
-            <div>
-              <label className="font-mono text-xs text-dust uppercase tracking-wider block mb-2">Decade</label>
-              <select value={decade} onChange={(e) => setDecade(e.target.value)} className="w-32">
-                <option value="1960">1960s</option>
-                <option value="1970">1970s</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Custom prompt toggle */}
-          <div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={useCustom}
-                onChange={(e) => setUseCustom(e.target.checked)}
-                className="accent-tape"
-              />
-              <span className="font-mono text-xs text-dust uppercase">Use custom prompt</span>
-            </label>
-            {useCustom && (
-              <textarea
-                value={customPrompt}
-                onChange={(e) => setCustomPrompt(e.target.value)}
-                rows={6}
-                placeholder="Enter your custom Lyria 3 prompt..."
-                className="w-full mt-3"
-              />
-            )}
-          </div>
-
-          <button
-            onClick={generate}
-            disabled={!title || !artists}
-            className="btn-primary w-full"
-          >
-            Generate Music
-          </button>
+              </div>
+            </section>
+          </aside>
         </div>
       )}
 
       {phase === "generating" && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="p-6 border border-tape/20 rounded bg-noir-2">
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-mono text-sm text-tape uppercase">Generating...</span>
-              <span className="font-mono text-sm text-dust">{progress}%</span>
-            </div>
-            <div className="w-full h-2 bg-noir-3 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-tape transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+          <div className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-tape">Generating</p>
+            <h2 className="mt-2 font-display text-3xl text-paper">Lyria Is Building Two Variations</h2>
+            <div className="mt-6 rounded-[20px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="font-mono text-xs uppercase tracking-[0.18em] text-dust">Progress</span>
+                <span className="font-mono text-xs uppercase tracking-[0.18em] text-paper">{progress}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-noir">
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,var(--tape),#f0d48e,var(--crimson))] transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="p-4 border border-dust/10 rounded bg-noir-3 max-h-60 overflow-y-auto font-mono text-xs text-dust space-y-1">
-            {logs.map((msg, i) => (
-              <div key={i} className="log-entry">{msg}</div>
-            ))}
+          <div className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">Live Log</p>
+            <div className="mt-4 max-h-[420px] overflow-y-auto rounded-[20px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 p-4 font-mono text-xs text-dust">
+              {logs.length === 0 ? (
+                <p>Waiting for generation events...</p>
+              ) : (
+                logs.map((message, index) => (
+                  <div key={`${message}-${index}`} className="log-entry py-1">
+                    {message}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </section>
       )}
 
       {phase === "done" && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="p-4 border border-tape/30 bg-tape/5 rounded">
-            <p className="font-mono text-sm text-tape">Generation complete — {clips.length} variation(s) saved to assets.</p>
-          </div>
+        <div className="space-y-6">
+          <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-tape">Complete</p>
+            <h2 className="mt-2 font-display text-3xl text-paper">Two Variations Are Ready</h2>
+            <p className="mt-3 font-body text-base text-ash">
+              The generated clips were saved into the asset library, so you can move into video assembly or reuse them later.
+            </p>
+          </section>
 
-          <div className="grid gap-4">
-            {clips.map((clip, i) => (
-              <div key={clip.id} className="p-4 border border-dust/20 rounded bg-noir-2">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="font-mono text-sm text-paper">Variation {i + 1}</span>
-                  {clip.duration && (
-                    <span className="font-mono text-xs text-dust">{Math.round(clip.duration)}s</span>
-                  )}
+          <div className="grid gap-4 lg:grid-cols-2">
+            {clips.map((clip, index) => (
+              <article
+                key={clip.id}
+                className="rounded-[24px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.2)]"
+              >
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-tape">Variation {index + 1}</p>
+                    <h3 className="mt-2 font-display text-2xl text-paper">{clip.title}</h3>
+                    <p className="mt-1 font-body text-sm text-ash">{clip.artists}</p>
+                  </div>
+                  {clip.duration ? (
+                    <span className="rounded-full border border-dust/15 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-dust">
+                      {Math.round(clip.duration)}s
+                    </span>
+                  ) : null}
                 </div>
+
                 <audio
                   controls
                   className="w-full"
-                  src={clip.assetId ? `/api/assets/${clip.assetId}` : undefined}
+                  src={clip.assetId ? `/api/assets/${clip.assetId}?inline=1` : undefined}
                 />
-              </div>
+              </article>
             ))}
           </div>
 
-          <div className="flex gap-3">
-            <button onClick={() => setPhase("configure")} className="btn-secondary flex-1">
+          <div className="flex flex-wrap gap-3">
+            <button onClick={() => setPhase("configure")} className="btn-secondary">
               Generate Again
             </button>
-            <a href="/assets?type=song" className="btn-primary flex-1 text-center">
+            <Link href="/video" className="btn-secondary">
+              Send to Video Tool
+            </Link>
+            <a href="/assets?type=song" className="btn-primary">
               View in Assets
             </a>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function MetricCard({ label, value, meta }: { label: string; value: string; meta: string }) {
+  return (
+    <div className="rounded-[22px] border border-[rgba(212,168,83,0.14)] bg-[rgba(10,6,4,0.42)] p-4 backdrop-blur">
+      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-dust">{label}</p>
+      <p className="mt-2 font-display text-3xl text-paper">{value}</p>
+      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-dust">{meta}</p>
+    </div>
+  );
+}
+
+function InfoPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[18px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">{label}</p>
+      <p className="mt-1 font-mono text-sm text-paper">{value}</p>
     </div>
   );
 }

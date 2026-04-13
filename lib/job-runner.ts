@@ -6,21 +6,35 @@ type Listener = (event: string, data: unknown) => void;
 type RunnerState = {
   listeners: Map<string, Set<Listener>>;
   running: Map<string, Promise<void>>;
+  starting: Set<string>;
 };
 
 function getRunnerState(): RunnerState {
   const globalState = globalThis as typeof globalThis & {
-    __pirosTapeRunnerState?: RunnerState;
+    __pirosTapeRunnerState?: Partial<RunnerState>;
   };
 
   if (!globalState.__pirosTapeRunnerState) {
     globalState.__pirosTapeRunnerState = {
       listeners: new Map(),
       running: new Map(),
+      starting: new Set(),
     };
   }
 
-  return globalState.__pirosTapeRunnerState;
+  if (!globalState.__pirosTapeRunnerState.listeners) {
+    globalState.__pirosTapeRunnerState.listeners = new Map();
+  }
+
+  if (!globalState.__pirosTapeRunnerState.running) {
+    globalState.__pirosTapeRunnerState.running = new Map();
+  }
+
+  if (!globalState.__pirosTapeRunnerState.starting) {
+    globalState.__pirosTapeRunnerState.starting = new Set();
+  }
+
+  return globalState.__pirosTapeRunnerState as RunnerState;
 }
 
 function emitToListeners(jobId: string, event: string, data: unknown) {
@@ -54,41 +68,48 @@ export function subscribeToJob(jobId: string, listener: Listener): () => void {
 }
 
 export function isJobRunning(jobId: string): boolean {
-  return getRunnerState().running.has(jobId);
+  const state = getRunnerState();
+  return state.running.has(jobId) || state.starting.has(jobId);
 }
 
 export async function ensureJobRunning(jobId: string): Promise<void> {
   const state = getRunnerState();
-  if (state.running.has(jobId)) {
+  if (state.running.has(jobId) || state.starting.has(jobId)) {
     return;
   }
 
-  const job = await getJob(jobId);
-  if (!job) {
-    throw new Error("Job not found");
-  }
+  state.starting.add(jobId);
 
-  if (job.status === "complete" || job.status === "legacy") {
-    return;
-  }
-
-  if (job.waitingFor) {
-    return;
-  }
-
-  const runner = (async () => {
-    try {
-      await runPipeline(job, (event, data) => {
-        emitToListeners(jobId, event === "error" ? "pipeline_error" : event, data);
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      emitToListeners(jobId, "pipeline_error", { step: 0, message });
-    } finally {
-      state.running.delete(jobId);
+  try {
+    const job = await getJob(jobId);
+    if (!job) {
+      throw new Error("Job not found");
     }
-  })();
 
-  state.running.set(jobId, runner);
-  await Promise.resolve();
+    if (job.status === "complete" || job.status === "legacy" || job.status === "error") {
+      return;
+    }
+
+    if (job.waitingFor) {
+      return;
+    }
+
+    const runner = (async () => {
+      try {
+        await runPipeline(job, (event, data) => {
+          emitToListeners(jobId, event === "error" ? "pipeline_error" : event, data);
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        emitToListeners(jobId, "pipeline_error", { step: 0, message });
+      } finally {
+        state.running.delete(jobId);
+      }
+    })();
+
+    state.running.set(jobId, runner);
+    await Promise.resolve();
+  } finally {
+    state.starting.delete(jobId);
+  }
 }

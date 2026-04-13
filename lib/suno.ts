@@ -185,6 +185,7 @@ export async function generateMusic(params: {
   style: string;
   title: string;
   apiKey: string;
+  instrumental?: boolean;
 }): Promise<SunoClip[]> {
   console.log("[Suno.generateMusic] Starting with title:", params.title);
 
@@ -193,7 +194,7 @@ export async function generateMusic(params: {
     prompt: params.prompt,
     style: params.style,
     title: params.title,
-    instrumental: true,
+    instrumental: params.instrumental ?? false,
     model: "V4_5ALL",
     callBackUrl: "http://example.com/callback",
   };

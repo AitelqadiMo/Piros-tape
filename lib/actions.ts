@@ -1,62 +1,59 @@
-/**
- * In-memory mechanism for pausing the pipeline and awaiting a user action.
- * Works for a single-user local app where all requests share the same Node.js process.
- */
+import { AwaitingInputType } from "./types";
+import { getJob, updateJob } from "./jobs";
 
-const pendingResolvers = new Map<string, (value: unknown) => void>();
-const pendingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/**
- * Pause the pipeline and wait for the user to call resolvePendingAction().
- * Times out after `timeoutMs` (default 10 minutes).
- */
-export function waitForAction(
+export async function waitForAction(
   jobId: string,
+  type: AwaitingInputType,
   timeoutMs = 600_000
 ): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    // Clear any previous pending action for this job
-    cancelPendingAction(jobId);
+  const deadline = Date.now() + timeoutMs;
 
-    pendingResolvers.set(jobId, resolve);
+  while (Date.now() < deadline) {
+    const job = await getJob(jobId);
 
-    const timer = setTimeout(() => {
-      pendingResolvers.delete(jobId);
-      pendingTimers.delete(jobId);
-      reject(new Error(`Action timed out for job ${jobId}`));
-    }, timeoutMs);
+    if (!job) {
+      throw new Error(`Job ${jobId} not found while waiting for action`);
+    }
 
-    pendingTimers.set(jobId, timer);
-  });
+    const pending = job.pendingAction;
+    if (pending?.type === type) {
+      await updateJob(jobId, { pendingAction: null });
+      return pending.payload;
+    }
+
+    await sleep(750);
+  }
+
+  throw new Error(`Action timed out for job ${jobId}`);
 }
 
-/**
- * Resolve a pending action from an API route handler.
- * Returns true if there was a pending action, false if not.
- */
-export function resolvePendingAction(jobId: string, value: unknown): boolean {
-  const resolve = pendingResolvers.get(jobId);
-  if (!resolve) return false;
+export async function submitPendingAction(
+  jobId: string,
+  type: AwaitingInputType,
+  payload: Record<string, unknown>
+): Promise<boolean> {
+  const job = await getJob(jobId);
 
-  const timer = pendingTimers.get(jobId);
-  if (timer) clearTimeout(timer);
+  if (!job || job.waitingFor !== type) {
+    return false;
+  }
 
-  pendingResolvers.delete(jobId);
-  pendingTimers.delete(jobId);
-  resolve(value);
+  await updateJob(jobId, {
+    pendingAction: {
+      type,
+      payload,
+      createdAt: new Date().toISOString(),
+    },
+  });
+
   return true;
 }
 
-/**
- * Cancel (reject) a pending action without resolving it.
- */
-export function cancelPendingAction(jobId: string): void {
-  const timer = pendingTimers.get(jobId);
-  if (timer) clearTimeout(timer);
-  pendingResolvers.delete(jobId);
-  pendingTimers.delete(jobId);
-}
-
-export function hasPendingAction(jobId: string): boolean {
-  return pendingResolvers.has(jobId);
+export async function hasPendingAction(jobId: string, type?: AwaitingInputType): Promise<boolean> {
+  const job = await getJob(jobId);
+  if (!job?.waitingFor) return false;
+  if (!type) return true;
+  return job.waitingFor === type;
 }

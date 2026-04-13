@@ -1,6 +1,7 @@
 export type StepStatus = "pending" | "running" | "done" | "error";
 
 export type JobStatus = "pending" | "running" | "complete" | "error" | "legacy";
+export type GenerationEngine = "lyria" | "suno";
 
 export type StyleName =
   | "Funk Soul"
@@ -15,6 +16,7 @@ export interface Job {
   title: string;
   artists: string;
   style: StyleName;
+  generationEngine?: GenerationEngine;
   decade: string;
   bpm: number;
   budapestYear: number;
@@ -26,8 +28,14 @@ export interface Job {
   createdAt: string;
   completedAt?: string;
   outputDir?: string;
+  errorMessage?: string;
   waitingFor?: AwaitingInputType | null;
   waitingPayload?: unknown;
+  pendingAction?: {
+    type: AwaitingInputType;
+    payload: Record<string, unknown>;
+    createdAt: string;
+  } | null;
   lyrics?: string;
 }
 
@@ -94,6 +102,12 @@ export interface ResearchCandidate {
   reasoning: string;
 }
 
+export interface SavedResearchSuggestion extends ResearchCandidate {
+  id: string;
+  query?: string;
+  createdAt: string;
+}
+
 export const STYLE_OPTIONS: StyleOption[] = [
   { name: "Funk Soul", decade: "1970s", energy: "Warm, soulful, melodic", defaultYear: 1974, defaultBpm: 90 },
   { name: "Funk Noir", decade: "1960s", energy: "Dark, gritty, street level", defaultYear: 1968, defaultBpm: 88 },
@@ -104,7 +118,7 @@ export const STYLE_OPTIONS: StyleOption[] = [
 ];
 
 export const PIPELINE_STEPS = [
-  { number: 1, name: "LYRIA 3 GENERATION" },
+  { number: 1, name: "MUSIC GENERATION" },
   { number: 2, name: "THUMBNAIL — GEMINI" },
   { number: 3, name: "BRANDING COMPOSITE" },
   { number: 4, name: "VIDEO ASSEMBLY" },
@@ -114,7 +128,7 @@ export const PIPELINE_STEPS = [
 
 // ── Asset System ──────────────────────────────────────────────────────────────
 
-export type AssetType = "song" | "thumbnail" | "video";
+export type AssetType = "song" | "thumbnail" | "video" | "artist_image";
 
 export interface Asset {
   id: string;
@@ -130,4 +144,7 @@ export interface Asset {
   sunoClipId?: string;
   createdAt: string;
   meta?: Record<string, unknown>;
+  // For artist_image type
+  artistName?: string;
+  sourceUrl?: string;
 }

@@ -7,13 +7,27 @@ export const maxDuration = 600;
 function buildReplay(job: NonNullable<Awaited<ReturnType<typeof getJob>>>) {
   const events: Array<{ event: string; data: unknown }> = [];
 
+  for (let i = 0; i < job.stepStatuses.length; i++) {
+    const status = job.stepStatuses[i];
+    events.push({
+      event: "step",
+      data: {
+        step: i + 1,
+        status,
+        progress: status === "done" || status === "error" ? 100 : status === "running" ? 10 : 0,
+        message:
+          status === "done"
+            ? "Complete"
+            : status === "error"
+              ? job.errorMessage || "Step failed"
+              : status === "running"
+                ? "In progress..."
+                : "",
+      },
+    });
+  }
+
   if (job.status === "complete" || job.status === "legacy") {
-    for (let i = 0; i < 6; i++) {
-      events.push({
-        event: "step",
-        data: { step: i + 1, status: "done", progress: 100, message: "Complete" },
-      });
-    }
     events.push({
       event: "complete",
       data: {
@@ -28,27 +42,9 @@ function buildReplay(job: NonNullable<Awaited<ReturnType<typeof getJob>>>) {
   if (job.status === "error") {
     events.push({
       event: "pipeline_error",
-      data: { step: job.currentStep, message: "Job previously failed" },
+      data: { step: job.currentStep, message: job.errorMessage || "Job previously failed" },
     });
     return events;
-  }
-
-  for (let i = 0; i < job.stepStatuses.length; i++) {
-    const status = job.stepStatuses[i];
-    events.push({
-      event: "step",
-      data: {
-        step: i + 1,
-        status,
-        progress: status === "done" ? 100 : status === "running" ? 10 : 0,
-        message:
-          status === "done"
-            ? "Complete"
-            : status === "running"
-              ? "In progress..."
-              : "",
-      },
-    });
   }
 
   if (job.waitingFor && job.waitingPayload) {

@@ -5,12 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:ci": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^1.48.0",
     "@google/generative-ai": "^0.24.1",
+    "ffmpeg-static": "^5.3.0",
     "fluent-ffmpeg": "^2.1.3",
     "next": "16.2.1",
     "react": "19.2.4",

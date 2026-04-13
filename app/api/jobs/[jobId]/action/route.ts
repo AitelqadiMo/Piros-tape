@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getJob } from "@/lib/jobs";
-import { resolvePendingAction, hasPendingAction } from "@/lib/actions";
+import { submitPendingAction, hasPendingAction } from "@/lib/actions";
+import { AwaitingInputType } from "@/lib/types";
 
 export async function POST(
   request: NextRequest,
@@ -20,14 +21,16 @@ export async function POST(
     return NextResponse.json({ error: "Missing action type" }, { status: 400 });
   }
 
-  if (!hasPendingAction(jobId)) {
+  const typedAction = type as AwaitingInputType;
+
+  if (!(await hasPendingAction(jobId, typedAction))) {
     return NextResponse.json(
       { error: "No pending action for this job" },
       { status: 409 }
     );
   }
 
-  const resolved = resolvePendingAction(jobId, payload);
+  const resolved = await submitPendingAction(jobId, typedAction, payload);
   if (!resolved) {
     return NextResponse.json(
       { error: "Failed to resolve action" },

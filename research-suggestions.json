@@ -1,0 +1,101 @@
+[
+  {
+    "artists": "Azahriah×Beton.Hofi×Krúbi",
+    "title": "NEON FÉNYEK",
+    "style": "Funk Noir",
+    "decade": "1970",
+    "bpm": 90,
+    "reasoning": "A gritty street narrative over a pulsating bassline and jazzy horn stabs, reflecting the urban decay of the late socialist era. The artists' distinct flows add depth to the melancholic groove.",
+    "id": "suggestion-1775066054961-8gwbbs",
+    "query": "a hungarian rap song with three rappers",
+    "createdAt": "2026-04-01T17:54:14.961Z"
+  },
+  {
+    "artists": "TIRPA×Bankos×Ketioz",
+    "title": "VASFÜGGÖNY BLUES",
+    "style": "Cold War Funk Noir",
+    "decade": "1960",
+    "bpm": 85,
+    "reasoning": "A track exploring societal tensions behind the Iron Curtain, blending Bankos's storytelling, Ketioz's raw delivery, and Tirpa's street-level perspective with a dark, groovy funk backdrop.",
+    "id": "suggestion-1775066054961-qyqxoc",
+    "query": "a hungarian rap song with three rappers",
+    "createdAt": "2026-04-01T17:54:14.961Z"
+  },
+  {
+    "artists": "Sub Bass Monster×Siska Finuccsi×Funktasztikus",
+    "title": "SZABAD EGY TÁNCRA?",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 110,
+    "reasoning": "An energetic anthem celebrating newfound freedoms and a sense of liberation, with a groovy rhythm section and a vibrant horn arrangement, perfect for a dancefloor flashback. This collaboration bridges generations of Hungarian rap over an infectious beat.",
+    "id": "suggestion-1775066054961-eh8c2s",
+    "query": "a hungarian rap song with three rappers",
+    "createdAt": "2026-04-01T17:54:14.961Z"
+  },
+  {
+    "artists": "Krúbi",
+    "title": "A VÉLEMÉNYD SZÁMÍT",
+    "style": "Political Soul",
+    "decade": "1970",
+    "bpm": 98,
+    "reasoning": "Captures Krúbi's sharp social critique over a groovy, protest-era soul sample, perfectly blending his cutting lyrics with a call to action. It embodies the spirit of impactful political commentary.",
+    "id": "suggestion-1775065377005-nl1fc3",
+    "query": "a hungarian women artist",
+    "createdAt": "2026-04-01T17:42:57.005Z"
+  },
+  {
+    "artists": "Beton.Hofi",
+    "title": "PANELPARADICSOM",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 105,
+    "reasoning": "A track exploring urban landscapes and hidden stories, featuring Beton.Hofi's distinctive flow over a driving, sample-heavy cinematic funk backdrop. It creates a vivid auditory journey through concrete dreams.",
+    "id": "suggestion-1775065377005-2ubi0c",
+    "query": "a hungarian women artist",
+    "createdAt": "2026-04-01T17:42:57.005Z"
+  },
+  {
+    "artists": "Funktasztikus",
+    "title": "BUDAPESTI RHYTHM",
+    "style": "Funk Noir",
+    "decade": "1960",
+    "bpm": 92,
+    "reasoning": "A gritty, atmospheric beat reminiscent of classic noir films, perfectly suited for Funktasztikus's intricate storytelling and boom-bap delivery. It conjures images of shadowy alleys and late-night city vibes.",
+    "id": "suggestion-1775065377005-bklx58",
+    "query": "a hungarian women artist",
+    "createdAt": "2026-04-01T17:42:57.005Z"
+  },
+  {
+    "artists": "Azahriah×Funktasztikus",
+    "title": "NYÁRI LÁZ",
+    "style": "Upbeat Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 118,
+    "reasoning": "Azahriah's melodic sensibilities meet Funktasztikus's lyrical depth over a vibrant groove, evoking the carefree joy of a Hungarian summer day. The track features a bright horn section and a driving bassline, perfect for sun-drenched street parties.",
+    "id": "suggestion-1775063484159-vjcl2m",
+    "query": "a hungarian rap song about summer",
+    "createdAt": "2026-04-01T17:11:24.159Z"
+  },
+  {
+    "artists": "Krúbi×Siska Finuccsi",
+    "title": "PANEL STRAND",
+    "style": "Funk Soul",
+    "decade": "1960",
+    "bpm": 105,
+    "reasoning": "Krúbi's witty observations on urban summer life, coupled with Siska Finuccsi's gritty delivery, transform the mundane panel housing estate into a soulful, sun-drenched oasis. The track uses a laid-back, groovy rhythm section and soulful female backing vocals.",
+    "id": "suggestion-1775063484159-ryohkr",
+    "query": "a hungarian rap song about summer",
+    "createdAt": "2026-04-01T17:11:24.159Z"
+  },
+  {
+    "artists": "Beton.Hofi×Bankos",
+    "title": "BALATONI ÁLOM",
+    "style": "Cinematic Soul Funk",
+    "decade": "1970",
+    "bpm": 98,
+    "reasoning": "Beton.Hofi and Bankos craft a nostalgic soundscape celebrating the tranquility and warmth of a summer evening by Lake Balaton. Lush strings and a walking bassline create a reflective, yet grooving atmosphere, perfect for a sunset drive.",
+    "id": "suggestion-1775063484159-ziz3hf",
+    "query": "a hungarian rap song about summer",
+    "createdAt": "2026-04-01T17:11:24.159Z"
+  }
+]

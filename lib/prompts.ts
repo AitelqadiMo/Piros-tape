@@ -53,10 +53,108 @@ Setting: Budapest ${job.budapestYear}, smoky soul groove, vintage noir atmospher
   return prompt;
 }
 
-export function buildImagePrompt(job: Job): string {
-  const moodSentence = imageMoodSentences[job.style];
+export function buildLyriaPrompt(job: Job): string {
+  const basePrompt = `${buildSunoStyle(job)}\n\n${buildSunoPrompt(job)}`;
+  const lyrics = job.lyrics?.trim();
 
-  return `Cinematic 16:9 studio portrait photograph. Four people standing close together in dark formal suits and ties, white dress shirts. Deep crimson red velvet curtain fills the entire background. A vintage 1950s-era gold microphone on a tall stand centered between them. Formally posed — serious, composed, slightly intimidating. Royal and classic mood. One figure has their face obscured or abstracted — masked, turned away, or hidden in shadow — this is intentional. ${moodSentence} Lighting: dramatic single-source studio light from slightly above, soft shadows. Film grain, faded Kodak color palette, slight vignette. Shot on 35mm. No text. No modern elements. Background is exclusively the red curtain.`;
+  if (!lyrics) {
+    return `${basePrompt}
+
+Vocal direction: strong Hungarian lead vocal, close-mic presence, emotionally direct phrasing.
+Write and perform original vocals that fit the title, mood, and arrangement. Do not make this instrumental.`;
+  }
+
+  const lyricGuide = buildLyricGuide(job);
+
+  return `${basePrompt}
+
+Vocal direction: write and perform original Hungarian vocals inspired by the supplied source lyrics. Do not quote or closely reproduce any existing lyrics verbatim. Preserve the energy, imagery, and vocal interplay from the lyric guide below. Do not make this instrumental.
+
+LYRIC GUIDE:
+${lyricGuide}`;
+}
+
+function buildLyricGuide(job: Job): string {
+  const lyrics = job.lyrics?.trim();
+  if (!lyrics) {
+    return `- Hook center: ${job.title}
+- Mood: ${job.moodLine || "vintage Hungarian soul-funk atmosphere"}
+- Write fresh lyrics in Hungarian that fit the title and setting.`;
+  }
+
+  const lines = lyrics
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const sections = Array.from(
+    new Set(
+      lines
+        .map((line) => {
+          const bracket = line.match(/^\[([^\]]+)\]$/);
+          if (bracket) return bracket[1].trim();
+
+          const colon = line.match(/^([^:]{2,40}):$/);
+          if (colon) return colon[1].trim();
+
+          return null;
+        })
+        .filter((value): value is string => Boolean(value))
+    )
+  );
+
+  const stopwords = new Set([
+    "vagy", "vagyok", "hogy", "mert", "ahol", "ami", "ez", "ezek", "az", "egy", "van",
+    "volt", "lesz", "meg", "már", "csak", "mint", "nekem", "neked", "én", "te", "mi",
+    "ti", "ők", "de", "és", "is", "ha", "itt", "ott", "ami", "aki", "akkor", "majd",
+    "minden", "mindig", "soha", "saját", "velem", "veled", "belém", "nekünk", "város",
+  ]);
+
+  const tokenCounts = new Map<string, number>();
+  for (const line of lines) {
+    for (const token of line.toLowerCase().match(/[\p{L}\p{N}]{4,}/gu) || []) {
+      if (stopwords.has(token)) continue;
+      tokenCounts.set(token, (tokenCounts.get(token) || 0) + 1);
+    }
+  }
+
+  const topThemes = Array.from(tokenCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([token]) => token);
+
+  const vocalSetup =
+    sections.length >= 2
+      ? `multi-voice exchange between ${sections.join(", ")}`
+      : sections.length === 1
+        ? `single lead vocal in the voice of ${sections[0]}`
+        : `Hungarian lead vocal with a strong refrain`;
+
+  const themeLine =
+    topThemes.length > 0
+      ? topThemes.join(", ")
+      : "urban movement, tension, release, inner resolve";
+
+  return [
+    `- Hook center: ${job.title}`,
+    `- Vocal setup: ${vocalSetup}`,
+    `- Themes and imagery to preserve: ${themeLine}`,
+    `- Mood to preserve: ${job.moodLine || "vintage Hungarian soul-funk atmosphere"}`,
+    "- Write fresh Hungarian lyrics with a memorable repeating chorus built around the title.",
+  ].join("\n");
+}
+
+export function buildImagePrompt(job: Job, artistImages?: string[]): string {
+  // Ultra-minimal prompt to avoid Gemini timeout
+  // Gemini is very slow with complex instructions - this is just the bare essentials
+  let prompt = `Four people in dark suits. Red velvet background. Vintage 1950s microphone. 35mm photograph.`;
+  
+  // If we have artist images, add a reference instruction
+  if (artistImages && artistImages.length > 0) {
+    prompt += ` Reference the real performers in the images.`;
+  }
+  
+  return prompt;
 }
 
 export function buildYouTubeTitle(job: Job): string {

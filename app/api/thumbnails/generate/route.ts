@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateThumbnail } from "@/lib/gemini";
 import { buildImagePrompt } from "@/lib/prompts";
 import { createAsset } from "@/lib/assets";
+import { getArtistImagePath } from "@/lib/artist-images";
 import { promises as fs } from "fs";
 import path from "path";
 import { Job, StyleName } from "@/lib/types";
@@ -28,6 +29,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Try to get artist images for reference
+    const artistNames = artists.split(" × ").map((a) => a.trim());
+    const artistImages: (string | null)[] = [];
+    
+    for (const artistName of artistNames) {
+      const imagePath = await getArtistImagePath(artistName);
+      artistImages.push(imagePath);
+    }
+
     const imagePrompt = customPrompt || buildImagePrompt({
       title,
       artists,
@@ -35,7 +45,7 @@ export async function POST(request: NextRequest) {
       decade: decade || "1970",
       budapestYear: budapestYear || 1974,
       moodLine: moodLine || "",
-    } as Job);
+    } as Job, artistImages.filter((img) => img !== null) as string[]);
 
     const outputDir = path.resolve(process.env.OUTPUT_DIR || "./output", "standalone");
     await fs.mkdir(outputDir, { recursive: true });

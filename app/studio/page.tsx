@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import StyleCard from "@/components/StyleCard";
 import { defaultMoodLines } from "@/lib/prompts";
 import { STYLE_OPTIONS, StyleOption } from "@/lib/types";
-import type { ResearchCandidate, StyleName } from "@/lib/types";
+import type { GenerationEngine, ResearchCandidate, SavedResearchSuggestion, StyleName } from "@/lib/types";
 
 type WizardStep = "discover" | "verify" | "configure";
 
@@ -39,16 +39,23 @@ function buildPromptPreview(
   selectedStyle: StyleOption | null,
   moodLine: string,
   budapestYear: string,
-  bpm: string
+  bpm: string,
+  lyrics: string | null
 ) {
   if (!selectedStyle) return "";
   const mood =
     moodLine || defaultMoodLines[selectedStyle.name as StyleName].replace("[YEAR]", budapestYear);
 
+  const vocalSection = lyrics?.trim()
+    ? `Vocal direction: derive an original Hungarian vocal from the source lyrics, preserving the themes and emotional arc without quoting the text verbatim.
+Source lyrics attached for inspiration: yes`
+    : "Vocal direction: write and perform original Hungarian vocals that match the mood and title. Do not make it instrumental.";
+
   return `Genre: Dark 1960s Funk / Hungarian Rap Fusion
 Instruments: deep electric bass, dry acoustic drums, tight snare, brushed cymbals, rhythm guitar with wah, Hammond organ swells, dirty Rhodes piano, muted brass stabs (trumpet, trombone, baritone sax), analog tape noise.
 Tempo: ${bpm} BPM, laid-back swing.
 Mood: ${mood}
+${vocalSection}
 Vocal style: raw Hungarian rap, close-mic delivery, overdriven tape tone, minimal reverb.
 Arrangement: intro (bass riff + drums), verse (rhythm + sparse organ), chorus (full horns + accents), instrumental break (guitar + organ solo), outro fading into tape hiss.
 Production: analog tape compression, mono reverb plate, low-shelf warmth, mild saturation; no digital synths or trap.
@@ -66,6 +73,8 @@ export default function StudioPage() {
   const [researchError, setResearchError] = useState("");
   const [manualTitle, setManualTitle] = useState("");
   const [manualArtists, setManualArtists] = useState("");
+  const [generationEngine, setGenerationEngine] = useState<GenerationEngine>("lyria");
+  const [savedSuggestions, setSavedSuggestions] = useState<SavedResearchSuggestion[]>([]);
 
   const [title, setTitle] = useState("");
   const [artists, setArtists] = useState("");
@@ -85,6 +94,19 @@ export default function StudioPage() {
 
   const stepIndex = STEP_META.findIndex((item) => item.key === step);
 
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetch("/api/research", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as { suggestions?: SavedResearchSuggestion[] };
+        setSavedSuggestions(data.suggestions || []);
+      } catch {
+        // Ignore saved suggestion load failures on initial render.
+      }
+    })();
+  }, []);
+
   const handleResearch = async () => {
     if (!researchQuery.trim()) return;
 
@@ -101,6 +123,7 @@ export default function StudioPage() {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
       setCandidates(data.candidates || []);
+      setSavedSuggestions(data.suggestions || []);
     } catch (error) {
       setResearchError(error instanceof Error ? error.message : String(error));
     } finally {
@@ -184,6 +207,7 @@ export default function StudioPage() {
           moodLine,
           releaseYear: releaseYear || undefined,
           lyrics: lyrics || undefined,
+          generationEngine,
         }),
       });
       const data = await response.json();
@@ -195,7 +219,7 @@ export default function StudioPage() {
     }
   };
 
-  const promptPreview = buildPromptPreview(selectedStyle, moodLine, budapestYear, bpm);
+  const promptPreview = buildPromptPreview(selectedStyle, moodLine, budapestYear, bpm, lyrics);
   const promptLength = promptPreview.length;
   const configValid = Boolean(title && artists && selectedStyle && budapestYear && bpm);
 
@@ -228,8 +252,8 @@ export default function StudioPage() {
               </p>
             </div>
             <div className="rounded-[22px] border border-[rgba(212,168,83,0.14)] bg-[rgba(10,6,4,0.42)] p-4 backdrop-blur">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-dust">Style</p>
-              <p className="mt-2 font-display text-2xl text-paper">{selectedStyle?.name || "Unset"}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-dust">Engine</p>
+              <p className="mt-2 font-display text-2xl text-paper">{generationEngine === "lyria" ? "Lyria" : "Suno"}</p>
             </div>
           </div>
         </div>
@@ -313,6 +337,51 @@ export default function StudioPage() {
         <div className="space-y-6">
           {step === "discover" && (
             <>
+              <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+                <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">Generation Engine</p>
+                    <h2 className="mt-2 font-display text-3xl text-paper">Choose The Music Model</h2>
+                  </div>
+                  <p className="max-w-md font-body text-sm leading-6 text-dust">
+                    Lyria is the richer vocal path for the current workflow. Suno is available as an alternate music engine for step 1.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setGenerationEngine("lyria")}
+                    className={`rounded-[22px] border p-5 text-left transition ${
+                      generationEngine === "lyria"
+                        ? "border-[rgba(212,168,83,0.32)] bg-[rgba(160,28,18,0.12)]"
+                        : "border-[rgba(212,168,83,0.12)] bg-noir-3/70"
+                    }`}
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-tape">Recommended</p>
+                    <h3 className="mt-2 font-display text-2xl text-paper">Lyria 3</h3>
+                    <p className="mt-2 font-body text-sm leading-6 text-ash">
+                      Stronger vocal generation in the current pipeline. Best choice when you want lyric-informed output.
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGenerationEngine("suno")}
+                    className={`rounded-[22px] border p-5 text-left transition ${
+                      generationEngine === "suno"
+                        ? "border-[rgba(212,168,83,0.32)] bg-[rgba(160,28,18,0.12)]"
+                        : "border-[rgba(212,168,83,0.12)] bg-noir-3/70"
+                    }`}
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-tape">Alternate Engine</p>
+                    <h3 className="mt-2 font-display text-2xl text-paper">Suno V4.5</h3>
+                    <p className="mt-2 font-body text-sm leading-6 text-ash">
+                      Uses the same studio brief but runs the music step through Suno before returning to the normal review flow.
+                    </p>
+                  </button>
+                </div>
+              </section>
+
               <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
                 <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
                   <div>
@@ -443,6 +512,57 @@ export default function StudioPage() {
                         <div className="mt-5 flex flex-wrap gap-3">
                           <button onClick={() => goToVerify(candidate.title, candidate.artists, candidate)} className="btn-primary">
                             Use this track
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {savedSuggestions.length > 0 && (
+                <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+                  <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-tape">Saved Suggestions</p>
+                      <h2 className="mt-2 font-display text-3xl text-paper">Reusable Shortlist</h2>
+                    </div>
+                    <p className="max-w-md font-body text-sm leading-6 text-dust">
+                      Previous research results are saved locally, so you can jump back into promising ideas without running a new search.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {savedSuggestions.slice(0, 8).map((candidate) => (
+                      <article
+                        key={candidate.id}
+                        className="rounded-[22px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 p-5"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div className="max-w-2xl">
+                            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-tape">
+                              Saved {candidate.query ? `• ${candidate.query}` : ""}
+                            </p>
+                            <h3 className="mt-2 font-display text-2xl text-paper">{candidate.title}</h3>
+                            <p className="mt-1 font-body text-base text-ash">{candidate.artists}</p>
+                            <p className="mt-3 font-body text-sm leading-7 text-dust">{candidate.reasoning}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="rounded-full border border-[rgba(212,168,83,0.18)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-paper">
+                              {candidate.style}
+                            </span>
+                            <span className="rounded-full border border-[rgba(212,168,83,0.18)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-dust">
+                              {candidate.decade}s
+                            </span>
+                            <span className="rounded-full border border-[rgba(212,168,83,0.18)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-dust">
+                              {candidate.bpm} BPM
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          <button onClick={() => goToVerify(candidate.title, candidate.artists, candidate)} className="btn-secondary">
+                            Use saved suggestion
                           </button>
                         </div>
                       </article>
@@ -677,13 +797,19 @@ export default function StudioPage() {
                   {selectedStyle ? "Ready" : "Missing"}
                 </span>
               </div>
+              <div className="flex items-center justify-between rounded-[18px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 px-4 py-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Engine</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-tape">
+                  {generationEngine}
+                </span>
+              </div>
             </div>
           </section>
 
           <section className="rounded-[26px] border border-[rgba(212,168,83,0.16)] bg-noir-2/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
             <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-dust">What Happens Next</p>
             <div className="mt-4 space-y-4 font-body text-sm leading-7 text-ash">
-              <p>1. Lyria 3 generates two candidate instrumentals from your brief.</p>
+              <p>1. Lyria 3 generates two candidate vocal takes from your brief and attached lyrics.</p>
               <p>2. You choose the winning take and review the thumbnail concept.</p>
               <p>3. The system composites branding, renders video, and writes metadata.</p>
             </div>

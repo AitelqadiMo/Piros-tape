@@ -88,6 +88,47 @@ function getConnectionLabel(state: ConnectionState) {
   return "Connecting";
 }
 
+function getRunnerStateLabel(
+  job: Job | null,
+  awaiting: AwaitingState,
+  runnerActive: boolean,
+  completed: boolean
+) {
+  if (job?.status === "error") return { label: "Stopped", tone: "text-crimson" };
+  if (awaiting) return { label: "Paused", tone: "text-paper" };
+  if (runnerActive) return { label: "Live", tone: "text-tape" };
+  if (completed) return { label: "Done", tone: "text-paper" };
+  if (job?.status === "pending") return { label: "Queued", tone: "text-dust" };
+  return { label: "Idle", tone: "text-dust" };
+}
+
+function buildErrorHint(error: string | null) {
+  if (!error) return "";
+  const normalized = error.toLowerCase();
+
+  if (normalized.includes("job not found")) {
+    return "This session id does not exist in the current job store. Open the job again from All Jobs or create a fresh session.";
+  }
+
+  if (normalized.includes("unable to load job")) {
+    return "The session API did not answer cleanly on first load. Try reopening the session from All Jobs. If it still fails, create a fresh session so we can compare behavior.";
+  }
+
+  if (normalized.includes("ffmpeg")) {
+    return "Video assembly needs FFmpeg. Install ffmpeg locally, set FFMPEG_PATH, or use the bundled ffmpeg-static dependency before starting a fresh job.";
+  }
+
+  if (normalized.includes("thumbnail") && normalized.includes("timed out")) {
+    return "The image model did not answer in time. Try a fresh job or shorten the art direction so Gemini has a simpler brief to render.";
+  }
+
+  if (normalized.includes("action timed out")) {
+    return "The pipeline was waiting for a review decision too long and the in-memory runner expired. Start a fresh job to continue cleanly.";
+  }
+
+  return "Review the latest log lines for the exact failing step, then retry with a fresh session.";
+}
+
 function mapWaitingState(job: Job | null): AwaitingState {
   if (!job?.waitingFor || !job.waitingPayload) return null;
 
@@ -98,8 +139,11 @@ function mapWaitingState(job: Job | null): AwaitingState {
 
   if (job.waitingFor === "thumbnail_review") {
     const payload = job.waitingPayload as { thumbnailUrl?: string };
-    const url = payload.thumbnailUrl
-      ? `${payload.thumbnailUrl}${payload.thumbnailUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
+    const baseUrl = payload.thumbnailUrl
+      ? `${payload.thumbnailUrl}${payload.thumbnailUrl.includes("?") ? "&" : "?"}inline=1`
+      : "";
+    const url = baseUrl
+      ? `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
       : "";
     return { type: "thumbnail_review", thumbnailUrl: url };
   }
@@ -108,8 +152,12 @@ function mapWaitingState(job: Job | null): AwaitingState {
     const payload = job.waitingPayload as { videoUrl?: string; thumbnailUrl?: string };
     return {
       type: "video_review",
-      videoUrl: payload.videoUrl || "",
-      thumbnailUrl: payload.thumbnailUrl || "",
+      videoUrl: payload.videoUrl
+        ? `${payload.videoUrl}${payload.videoUrl.includes("?") ? "&" : "?"}inline=1`
+        : "",
+      thumbnailUrl: payload.thumbnailUrl
+        ? `${payload.thumbnailUrl}${payload.thumbnailUrl.includes("?") ? "&" : "?"}inline=1`
+        : "",
     };
   }
 
@@ -137,7 +185,12 @@ function buildNextAction(job: Job | null, awaiting: AwaitingState) {
   if (awaiting?.type === "thumbnail_review") return "Approve the thumbnail or ask for another pass.";
   if (awaiting?.type === "video_review") return "Review the video. Adjust settings and re-render, or approve.";
   if (job.status === "complete" || job.status === "legacy") return "Download the assets and metadata package.";
-  if (job.status === "error") return "Review the error log and restart from a fresh job.";
+  if (job.status === "error") {
+    if (job.errorMessage?.toLowerCase().includes("ffmpeg")) {
+      return "Install FFmpeg support, then restart from a fresh job.";
+    }
+    return "Review the error log and restart from a fresh job.";
+  }
   if (job.status === "pending") return "Starting the pipeline engine.";
   return STEP_HINTS[Math.max(0, job.currentStep - 1)] || "Pipeline is moving.";
 }
@@ -153,6 +206,26 @@ async function loadMetadata(jobId: string) {
     title: titleMatch[1],
     description: descMatch[1].trim(),
   };
+}
+
+async function readApiError(response: Response, fallback: string) {
+  const contentType = response.headers.get("content-type") || "";
+
+  try {
+    if (contentType.includes("application/json")) {
+      const data = (await response.json()) as { error?: string };
+      return data.error || fallback;
+    }
+
+    const text = (await response.text()).trim();
+    return text || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export default function JobPage() {
@@ -182,7 +255,10 @@ export default function JobPage() {
     setSteps((previous) => hydrateStepsFromJob(incoming, previous));
 
     if (incoming.status === "error") {
-      setError(`The production stopped on step ${incoming.currentStep}. Check the log for details.`);
+      setError(
+        incoming.errorMessage ||
+          `The production stopped on step ${incoming.currentStep}. Check the log for details.`
+      );
     }
 
     if ((incoming.status === "complete" || incoming.status === "legacy") && !metadataLoadedRef.current) {
@@ -198,11 +274,37 @@ export default function JobPage() {
     let cancelled = false;
 
     const refreshJob = async () => {
-      const response = await fetch(`/api/jobs/${jobId}`, { cache: "no-store" });
-      if (!response.ok) throw new Error("Unable to load job");
-      const data = (await response.json()) as JobResponse;
-      if (cancelled) return;
-      await syncFromJob(data.job, data.runnerActive);
+      if (!jobId) {
+        throw new Error("Job not found");
+      }
+
+      let lastMessage = "Unable to load job";
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const response = await fetch(`/api/jobs/${jobId}`, { cache: "no-store" });
+
+        if (response.ok) {
+          const data = (await response.json()) as JobResponse;
+          if (cancelled) return;
+          await syncFromJob(data.job, data.runnerActive);
+          return;
+        }
+
+        lastMessage = await readApiError(
+          response,
+          response.status === 404 ? "Job not found" : "Unable to load job"
+        );
+
+        if (response.status === 404) {
+          throw new Error(lastMessage);
+        }
+
+        if (attempt < 2) {
+          await delay(350 * (attempt + 1));
+        }
+      }
+
+      throw new Error(lastMessage);
     };
 
     const startJob = async () => {
@@ -251,7 +353,19 @@ export default function JobPage() {
       source.addEventListener("log", (event) => {
         setConnectionState("live");
         const data = JSON.parse((event as MessageEvent).data) as PipelineLogEvent;
-        setLogs((previous) => [...previous, data]);
+        setLogs((previous) => {
+          if (
+            previous.some(
+              (entry) =>
+                entry.timestamp === data.timestamp &&
+                entry.message === data.message &&
+                entry.level === data.level
+            )
+          ) {
+            return previous;
+          }
+          return [...previous, data];
+        });
       });
 
       source.addEventListener("awaiting_input", (event) => {
@@ -263,8 +377,11 @@ export default function JobPage() {
         }
 
         if (data.type === "thumbnail_review") {
-          const url = data.payload.thumbnailUrl
-            ? `${data.payload.thumbnailUrl}${data.payload.thumbnailUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
+          const baseUrl = data.payload.thumbnailUrl
+            ? `${data.payload.thumbnailUrl}${data.payload.thumbnailUrl.includes("?") ? "&" : "?"}inline=1`
+            : "";
+          const url = baseUrl
+            ? `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
             : "";
           setAwaiting({ type: "thumbnail_review", thumbnailUrl: url });
         }
@@ -273,8 +390,12 @@ export default function JobPage() {
           const payload = data.payload as { videoUrl?: string; thumbnailUrl?: string };
           setAwaiting({
             type: "video_review",
-            videoUrl: payload.videoUrl || "",
-            thumbnailUrl: payload.thumbnailUrl || "",
+            videoUrl: payload.videoUrl
+              ? `${payload.videoUrl}${payload.videoUrl.includes("?") ? "&" : "?"}inline=1`
+              : "",
+            thumbnailUrl: payload.thumbnailUrl
+              ? `${payload.thumbnailUrl}${payload.thumbnailUrl.includes("?") ? "&" : "?"}inline=1`
+              : "",
           });
         }
       });
@@ -334,6 +455,8 @@ export default function JobPage() {
 
   const elapsed = getElapsedSeconds(job);
   const doneSteps = steps.filter((step) => step.status === "done").length;
+  const runnerStateMeta = getRunnerStateLabel(job, awaiting, runnerActive, completed);
+  const errorHint = buildErrorHint(error);
   const overallProgress =
     (steps.reduce((sum, step) => {
       if (step.status === "done") return sum + 100;
@@ -413,8 +536,8 @@ export default function JobPage() {
             </div>
             <div className="rounded-[22px] border border-[rgba(212,168,83,0.14)] bg-[rgba(10,6,4,0.42)] p-4 backdrop-blur">
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-dust">Runner</p>
-              <p className={`mt-2 font-display text-3xl ${runnerActive ? "text-tape" : "text-paper"}`}>
-                {runnerActive ? "Live" : completed ? "Done" : "Queued"}
+              <p className={`mt-2 font-display text-3xl ${runnerStateMeta.tone}`}>
+                {runnerStateMeta.label}
               </p>
             </div>
           </div>
@@ -531,7 +654,7 @@ export default function JobPage() {
               </div>
 
               <div className="overflow-hidden rounded-[20px] border border-[rgba(212,168,83,0.12)] bg-noir">
-                <video controls className="aspect-video w-full bg-noir" src={`/api/jobs/${jobId}/download?file=video`} />
+                <video controls className="aspect-video w-full bg-noir" src={`/api/jobs/${jobId}/download?file=video&inline=1`} />
               </div>
 
               {metadata && (
@@ -560,6 +683,9 @@ export default function JobPage() {
             <section className="rounded-[26px] border border-crimson/60 bg-[rgba(160,28,18,0.08)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-crimson">Pipeline Error</p>
               <p className="mt-2 font-body text-base text-ash">{error}</p>
+              {errorHint ? (
+                <p className="mt-3 font-body text-sm leading-6 text-ash">{errorHint}</p>
+              ) : null}
             </section>
           )}
         </div>
@@ -571,6 +697,10 @@ export default function JobPage() {
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Style</p>
                 <p className="mt-1 font-display text-xl text-paper">{job?.style || "Waiting"}</p>
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Engine</p>
+                <p className="mt-1 font-display text-xl text-paper">{job?.generationEngine || "lyria"}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-[18px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 p-3">
@@ -585,6 +715,14 @@ export default function JobPage() {
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Mood Line</p>
                 <p className="mt-2 font-body text-sm leading-6 text-ash">{job?.moodLine || "No mood line saved."}</p>
+              </div>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Lyrics</p>
+                <p className="mt-2 font-body text-sm leading-6 text-ash">
+                  {job?.lyrics?.trim()
+                    ? "Used to derive a safe vocal brief for Lyria without sending the source text verbatim."
+                    : "No saved lyrics. The model will generate vocals from the title, mood, and style brief."}
+                </p>
               </div>
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Next Move</p>
@@ -604,8 +742,8 @@ export default function JobPage() {
               </div>
               <div className="flex items-center justify-between rounded-[18px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 px-4 py-3">
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-dust">Runner</span>
-                <span className={`font-mono text-[11px] uppercase tracking-[0.18em] ${runnerActive ? "text-tape" : "text-dust"}`}>
-                  {runnerActive ? "Active" : completed ? "Finished" : "Idle"}
+                <span className={`font-mono text-[11px] uppercase tracking-[0.18em] ${runnerStateMeta.tone}`}>
+                  {runnerStateMeta.label}
                 </span>
               </div>
               <div className="flex items-center justify-between rounded-[18px] border border-[rgba(212,168,83,0.12)] bg-noir-3/70 px-4 py-3">

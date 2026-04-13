@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchLyrics } from "@/lib/gemini";
+import { fetchArtistImages } from "@/lib/artist-images";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,8 +15,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
     }
 
-    const result = await fetchLyrics(artist, title, apiKey);
-    return NextResponse.json(result);
+    // Fetch both lyrics and artist images in parallel
+    const [lyricsResult, artistImages] = await Promise.all([
+      fetchLyrics(artist, title, apiKey),
+      fetchArtistImages(artist, apiKey),
+    ]);
+
+    return NextResponse.json({
+      ...lyricsResult,
+      artistImages,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });

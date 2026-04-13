@@ -1,0 +1,220 @@
+[
+  {
+    "type": "song",
+    "title": "SZÁRAZ JÉG ÉS TŰZ",
+    "artists": "krubi",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/standalone/SZ_RAZ_J_G__S_T_Z_v1_1775060731965.mp3",
+    "fileName": "SZ_RAZ_J_G__S_T_Z_v1_1775060731965.mp3",
+    "fileSize": 4009079,
+    "id": "asset-1775060731967-qa3lid",
+    "createdAt": "2026-04-01T16:25:31.967Z"
+  },
+  {
+    "type": "song",
+    "title": "SZÁRAZ JÉG ÉS TŰZ",
+    "artists": "krubi",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/standalone/SZ_RAZ_J_G__S_T_Z_v2_1775060731967.mp3",
+    "fileName": "SZ_RAZ_J_G__S_T_Z_v2_1775060731967.mp3",
+    "fileSize": 4043560,
+    "id": "asset-1775060731968-6zpz6c",
+    "createdAt": "2026-04-01T16:25:31.968Z"
+  },
+  {
+    "type": "song",
+    "title": "SZÁRAZ JÉG ÉS TŰZ",
+    "artists": "Krúbi",
+    "style": "Upbeat Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775060629786-3qzli2/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 3609092,
+    "jobId": "job-1775060629786-3qzli2",
+    "id": "asset-1775060809186-npf248",
+    "createdAt": "2026-04-01T16:26:49.186Z"
+  },
+  {
+    "type": "song",
+    "title": "SZÁRAZ JÉG ÉS TŰZ",
+    "artists": "Krúbi",
+    "style": "Upbeat Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775060629786-3qzli2/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 3746391,
+    "jobId": "job-1775060629786-3qzli2",
+    "id": "asset-1775061104079-ytnhbt",
+    "createdAt": "2026-04-01T16:31:44.079Z"
+  },
+  {
+    "type": "thumbnail",
+    "title": "SZÁRAZ JÉG ÉS TŰZ",
+    "artists": "Krúbi",
+    "style": "Upbeat Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775060629786-3qzli2/thumbnail_raw.jpg",
+    "fileName": "thumbnail_raw.jpg",
+    "fileSize": 707750,
+    "jobId": "job-1775060629786-3qzli2",
+    "id": "asset-1775061140923-yvqu1s",
+    "createdAt": "2026-04-01T16:32:20.923Z"
+  },
+  {
+    "type": "thumbnail",
+    "title": "SZÁRAZ JÉG ÉS TŰZ",
+    "artists": "krubi",
+    "style": "Funk Soul",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/standalone/SZ_RAZ_J_G__S_T_Z_thumb_1775060901850.jpg",
+    "fileName": "SZ_RAZ_J_G__S_T_Z_thumb_1775060901850.jpg",
+    "fileSize": 666197,
+    "id": "asset-1775061198602-rwgxmc",
+    "createdAt": "2026-04-01T16:33:18.602Z"
+  },
+  {
+    "type": "song",
+    "title": "PANEL STRAND",
+    "artists": "Krúbi×Siska Finuccsi",
+    "style": "Funk Soul",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775063712245-1xbm37/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 6385806,
+    "jobId": "job-1775063712245-1xbm37",
+    "id": "asset-1775063959855-0x337t",
+    "createdAt": "2026-04-01T17:19:19.856Z"
+  },
+  {
+    "type": "song",
+    "title": "BALATONI ÁLOM",
+    "artists": "Beton.Hofi×Bankos",
+    "style": "Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775064713642-djmc0t/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 4311263,
+    "jobId": "job-1775064713642-djmc0t",
+    "id": "asset-1775064778789-9jwci7",
+    "createdAt": "2026-04-01T17:32:58.790Z"
+  },
+  {
+    "type": "thumbnail",
+    "title": "BALATONI ÁLOM",
+    "artists": "Beton.Hofi×Bankos",
+    "style": "Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775064713642-djmc0t/thumbnail_raw.jpg",
+    "fileName": "thumbnail_raw.jpg",
+    "fileSize": 716762,
+    "jobId": "job-1775064713642-djmc0t",
+    "id": "asset-1775064871569-unxgz5",
+    "createdAt": "2026-04-01T17:34:31.569Z"
+  },
+  {
+    "type": "song",
+    "title": "PANELPARADICSOM",
+    "artists": "Beton.Hofi",
+    "style": "Upbeat Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775065402478-ibnbdn/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 3600942,
+    "jobId": "job-1775065402478-ibnbdn",
+    "id": "asset-1775065462888-4r43dh",
+    "createdAt": "2026-04-01T17:44:22.888Z"
+  },
+  {
+    "type": "thumbnail",
+    "title": "kia",
+    "artists": "toto",
+    "style": "Funk Soul",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/standalone/kia_thumb_1775065636776.jpg",
+    "fileName": "kia_thumb_1775065636776.jpg",
+    "fileSize": 663176,
+    "id": "asset-1775065649968-0zxwgy",
+    "createdAt": "2026-04-01T17:47:29.968Z"
+  },
+  {
+    "type": "video",
+    "title": "PANELPARADICSOM",
+    "artists": "Beton.Hofi",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/standalone/PANELPARADICSOM_PIROS_TAPE_1775065848705.mp4",
+    "fileName": "PANELPARADICSOM_PIROS_TAPE_1775065848705.mp4",
+    "fileSize": 13208657,
+    "meta": {
+      "songAssetId": "asset-1775065462888-4r43dh",
+      "thumbnailAssetId": "asset-1775065649968-0zxwgy",
+      "crf": 18,
+      "audioBitrate": "320k"
+    },
+    "id": "asset-1775065878248-0mu3vg",
+    "createdAt": "2026-04-01T17:51:18.248Z"
+  },
+  {
+    "type": "song",
+    "title": "NEON FÉNYEK",
+    "artists": "Azahriah×Beton.Hofi×Krúbi",
+    "style": "Upbeat Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775066087887-1h2w5j/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 6986094,
+    "jobId": "job-1775066087887-1h2w5j",
+    "id": "asset-1775066422384-n4e8h2",
+    "createdAt": "2026-04-01T18:00:22.384Z"
+  },
+  {
+    "type": "video",
+    "title": "NEON FÉNYEK",
+    "artists": "Azahriah×Beton.Hofi×Krúbi",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/standalone/NEON_F_NYEK_PIROS_TAPE_1775066613559.mp4",
+    "fileName": "NEON_F_NYEK_PIROS_TAPE_1775066613559.mp4",
+    "fileSize": 24401181,
+    "meta": {
+      "songAssetId": "asset-1775066422384-n4e8h2",
+      "thumbnailAssetId": "asset-1775065649968-0zxwgy",
+      "crf": 18,
+      "audioBitrate": "320k"
+    },
+    "id": "asset-1775066666747-kq8jpq",
+    "createdAt": "2026-04-01T18:04:26.747Z"
+  },
+  {
+    "type": "song",
+    "title": "A VÉLEMÉNYD SZÁMÍT",
+    "artists": "Krúbi",
+    "style": "Upbeat Cinematic Soul Funk",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775066795547-0mdys3/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 4237911,
+    "jobId": "job-1775066795547-0mdys3",
+    "id": "asset-1775066864799-8bmlxw",
+    "createdAt": "2026-04-01T18:07:44.799Z"
+  },
+  {
+    "type": "song",
+    "title": "VASFÜGGÖNY BLUES",
+    "artists": "TIRPA×Bankos×Ketioz",
+    "style": "Cold War Funk Noir",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775067785330-vjmjfq/song.mp3",
+    "fileName": "song.mp3",
+    "fileSize": 4277408,
+    "jobId": "job-1775067785330-vjmjfq",
+    "id": "asset-1775067852054-9qcrq4",
+    "createdAt": "2026-04-01T18:24:12.054Z"
+  },
+  {
+    "type": "thumbnail",
+    "title": "VASFÜGGÖNY BLUES",
+    "artists": "TIRPA×Bankos×Ketioz",
+    "style": "Cold War Funk Noir",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775067785330-vjmjfq/thumbnail_raw.jpg",
+    "fileName": "thumbnail_raw.jpg",
+    "fileSize": 760080,
+    "jobId": "job-1775067785330-vjmjfq",
+    "id": "asset-1775068006624-ihk3m6",
+    "createdAt": "2026-04-01T18:26:46.624Z"
+  },
+  {
+    "type": "video",
+    "title": "VASFÜGGÖNY BLUES",
+    "artists": "TIRPA×Bankos×Ketioz",
+    "style": "Cold War Funk Noir",
+    "filePath": "/Users/mohammedaitelqadi/Piros-tape/output/job-1775067785330-vjmjfq/VASF_GG_NY_BLUES_PIROS_TAPE.mp4",
+    "fileName": "VASF_GG_NY_BLUES_PIROS_TAPE.mp4",
+    "fileSize": 17325668,
+    "jobId": "job-1775067785330-vjmjfq",
+    "id": "asset-1775068058175-065fch",
+    "createdAt": "2026-04-01T18:27:38.175Z"
+  }
+]

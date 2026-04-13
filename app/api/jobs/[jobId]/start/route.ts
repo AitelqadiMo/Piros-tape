@@ -13,7 +13,7 @@ export async function POST(
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
-  if (job.status === "complete" || job.status === "legacy") {
+  if (job.status === "complete" || job.status === "legacy" || job.status === "error") {
     return NextResponse.json({ ok: true, status: job.status, started: false });
   }
 

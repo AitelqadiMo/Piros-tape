@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readJobs, createJob } from "@/lib/jobs";
-import { StyleName } from "@/lib/types";
+import { GenerationEngine, StyleName } from "@/lib/types";
 
 export async function GET() {
   try {
@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { artists, title, style, decade, bpm, budapestYear, moodLine, releaseYear, lyrics } = body;
+    const { artists, title, style, decade, bpm, budapestYear, moodLine, releaseYear, lyrics, generationEngine } = body;
 
     if (!artists || !title || !style || !decade || !bpm || !budapestYear) {
       return NextResponse.json(
@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
       artists,
       title: title.toUpperCase(),
       style: style as StyleName,
+      generationEngine: (generationEngine as GenerationEngine) || "lyria",
       decade,
       bpm: Number(bpm),
       budapestYear: Number(budapestYear),

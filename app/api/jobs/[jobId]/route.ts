@@ -6,15 +6,20 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ jobId: string }> }
 ) {
-  const { jobId } = await params;
-  const job = await getJob(jobId);
+  try {
+    const { jobId } = await params;
+    const job = await getJob(jobId);
 
-  if (!job) {
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    if (!job) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      job,
+      runnerActive: isJobRunning(jobId),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  return NextResponse.json({
-    job,
-    runnerActive: isJobRunning(jobId),
-  });
 }
